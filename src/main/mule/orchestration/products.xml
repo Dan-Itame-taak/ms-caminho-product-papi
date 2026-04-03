@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce-sapi="http://www.mulesoft.org/schema/mule/salesforce-sapi"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:dealernet-sapi="http://www.mulesoft.org/schema/mule/dealernet-sapi"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schema/mule/dealernet-sapi/current/mule-dealernet-sapi.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd">
+	<flow name="send-products-flow" doc:id="5b6947db-5f95-453d-bc9c-e92393190845">
+		<scheduler doc:name="Scheduler 1 hora" doc:id="68353a86-310d-4df3-b046-ea3138eec5ff" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="60" startDelay="10" timeUnit="MINUTES" />
+			</scheduling-strategy>
+		</scheduler>
+		<ee:transform doc:name="Varaibles to Get RecordType" doc:id="75952be1-ff55-469e-85d5-92b4e4fea8e2" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="name" ><![CDATA[%dw 2.0
+output application/json
+---
+"Peça"]]></ee:set-variable>
+				<ee:set-variable variableName="object" ><![CDATA[%dw 2.0
+output application/json
+---
+"Product2"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="get-recordType" doc:id="6dfbfc81-8eb7-462f-b3da-7a012d364510" name="get-recordType" target="recordTypePeca"/>
+		<logger level="INFO" doc:name="Logger" doc:id="2ad08fc7-4984-4393-a342-30e8fa29be5a" message="#[vars.recordTypePeca]"/>
+		<flow-ref doc:name="get-products-stock" doc:id="e3505d22-5b70-427f-8f79-03f2e67823a8" name="get-products-stock"/>
+		<batch:job jobName="send_products_stock_BatchJob" doc:id="d0bf39b2-e6f1-4d80-9a1d-30ddbdec8d69" maxFailedRecords="-1" blockSize="1000" maxConcurrency="2">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="d07339c9-c7b5-454f-81df-bbc8a9bee7e2" >
+					<ee:transform doc:name="Map Products Payload From DealerNet" doc:id="be717849-9b84-4491-9a25-22a7cdad5892" >
+						<ee:message >
+							<ee:set-payload resource="dwl/map-product-stock.dwl" />
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="1e61e2c3-a9b6-4733-ae97-f5033a19a753" size="200" preserveMimeTypes="true" >
+						<ee:transform doc:name="Aggregate Payload" doc:id="c6568674-5dcd-4a69-a9fa-0412a0ab1109" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<flow-ref doc:name="send-products-to-salesforce" doc:id="a053ac7a-fbae-4ccd-bc36-8827505a65f0" name="send-products-to-salesforce"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<ee:transform doc:name="Results" doc:id="b089a4df-3f21-4636-934d-4bb94218d29a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="Logger Finish Get Assets Stock" doc:id="34243ae8-6fdb-4532-99d0-1c244d7dc361" message="#[payload]"/>
+		<error-handler ref="globalError_Router" />
+	</flow>
+</mule>

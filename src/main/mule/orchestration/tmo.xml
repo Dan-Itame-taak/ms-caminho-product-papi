@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<flow name="send-tmo-flow" doc:id="570a8112-cfd9-4bbc-8edb-0b32f2c51c12" >
+		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="d3f7686a-0721-4ac7-8bd9-6191f543838f" >
+			<scheduling-strategy >
+				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo" />
+			</scheduling-strategy>
+		</scheduler>
+		<ee:transform doc:name="Varaibles to Get RecordType" doc:id="11be6260-5b2d-4fb9-adb7-39877a954f26" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="name" ><![CDATA[%dw 2.0
+output application/json
+---
+"TMO"]]></ee:set-variable>
+				<ee:set-variable variableName="object" ><![CDATA[%dw 2.0
+output application/json
+---
+"Product2"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="get-recordType" doc:id="4b38600b-0584-4b4f-90cc-96f6661a9ac1" name="get-recordType" target="recordTypeTMO" />
+		<logger level="INFO" doc:name="Logger" doc:id="9ed665ea-8e8b-4bb5-8a99-9c2f96de3574" message="#[vars.recordTypePeca]" />
+		<flow-ref doc:name="get-tmo-catalog" doc:id="47a63ac9-0911-464f-a61a-77ed5e3a75d2" name="get-tmo-catalog" />
+		<flow-ref doc:name="tmo-mapping-flow" doc:id="4b1022a5-17da-4f1e-904d-3fe3c69904ab" name="tmo-mapping-flow"/>
+		<logger level="INFO" doc:name="Logger Finish TMO" doc:id="97364581-ed0d-4fd7-803a-e8b43c9f8b94" message="#[payload]" />
+		<error-handler ref="globalError_Router" />
+	</flow>
+	<flow name="tmo-mapping-flow" doc:id="dff076d4-ac43-41a9-8d25-589f0d25555d" >
+		<batch:job jobName="send_tmo_catalogBatch_Job" doc:id="bf01af2d-7453-4483-93b4-f2f5412f7ddf" maxFailedRecords="-1">
+			<batch:process-records>
+				<batch:step name="Batch_Step" doc:id="dd681fe6-b7fb-4b46-b775-fabf0e9dc2a1">
+					<ee:transform doc:name="Map TMO Payload From Dealernet" doc:id="7d9d6ee2-50da-4bbd-a6b5-915ff7fbfdee">
+						<ee:message>
+							<ee:set-payload resource="dwl/map-tmo.dwl" />
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="80c32182-22bd-471e-9dbc-ed8efb269df1" size="200" preserveMimeTypes="true">
+						<ee:transform doc:name="Aggregate Payload" doc:id="e312d170-3e6a-4296-a544-cc84c1690462">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<flow-ref doc:name="send-products-to-salesforce" doc:id="609b9f96-7f00-41fb-8b2f-9ee6bc61d837" name="send-products-to-salesforce" />
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete>
+				<ee:transform doc:name="Results" doc:id="7976528f-f570-4bdd-ba42-155428facd63">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+	<flow name="send-tmo-hourly-rate-flow" doc:id="8a7aa2f4-58c9-4bc1-a322-5e66c6df6d07" >
+		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="9bddb191-e8d6-4c1d-a25a-f81d1794f160" >
+			<scheduling-strategy >
+				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo" />
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Logger Start" doc:id="019bc8ea-e61a-4f51-a192-e2ef53956ff9" message="Start Logger | Integration: send-tmo-hourly-rate | correlationId: #[correlationId]"/>
+		<flow-ref doc:name="get-hourly-rate" doc:id="41f5d0db-bf48-401a-8036-968577e72e5a" name="get-hourly-rate"/>
+		<batch:job jobName="tmoBatch_Job" doc:id="b4b8c601-9491-47cc-b926-6e519514c803" >
+			<batch:process-records >
+				<batch:step name="Batch_Step1" doc:id="1e9321ce-a003-4e93-b5ec-2eb6ae722843" >
+					<ee:transform doc:name="Map TMO Houry Rate From Dealernet" doc:id="567f8967-e77e-49a1-a271-2d0ea8e3f693" >
+						<ee:message >
+							<ee:set-payload resource="dwl/map-hourly-rate.dwl" />
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="fcfd8d10-82ed-4474-83a4-a5b6511cba22" size="200" preserveMimeTypes="true">
+						<ee:transform doc:name="Aggregate Payload" doc:id="3c8ed985-7eed-4114-b9ce-a3ebd0750166" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<flow-ref doc:name="send-hourly-rate-to-salesforce" doc:id="d998b62b-da1d-4169-8bbc-aaa089800244" name="send-hourly-rate-to-salesforce"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<ee:transform doc:name="Results" doc:id="9d770497-eb6e-47fa-8dfd-882780e0dfe1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="Logger Finish Hourly Rate" doc:id="d39cb3b8-305c-45da-b931-aaa5a299568e" message="#[payload]" />
+		<error-handler ref="globalError_Router" />
+	</flow>
+</mule>

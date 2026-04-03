@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce-sapi="http://www.mulesoft.org/schema/mule/salesforce-sapi" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:dealernet-sapi="http://www.mulesoft.org/schema/mule/dealernet-sapi" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schema/mule/dealernet-sapi/current/mule-dealernet-sapi.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd">
+	<flow name="send-optionals-flow" doc:id="f515994e-a7cb-4def-bd7d-84e337743810" initialState="stopped">
+		<scheduler doc:name="Scheduler 1 hora" doc:id="6025162a-1dca-4e57-b76b-23fdad9f4636" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="60" timeUnit="MINUTES" startDelay="10"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Logger Start Get Assets Stock" doc:id="5df9cd2a-232f-4244-8da3-45dfe7c8b961" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="3f4c6511-c989-4d59-a99a-41f11ead65dd" >
+			<route >
+				<dealernet-sapi:get-vehicles-optional-features doc:name="Get Vehicles Optional Features - Catalog" doc:id="95243e17-8bad-4bde-bbdc-c3e04c235c44" config-ref="Dealernet_sapi_Config" client-id="bf0b64df2edc4bd7a4ae38a5140a441f" search-type="catalog" client-secret="265b41f051d94f28A1AB62018296E99b"/>
+				<batch:job jobName="send_optionals_catalog_BatchJob" doc:id="0f988c74-cdf1-4822-987b-a8f00c0188e3">
+			<batch:process-records>
+				<batch:step name="Send_Catalog_Batch_Step" doc:id="5339dc30-f016-4c43-9367-b6395adefd27">
+					<ee:transform doc:name="Map Optionals Payload From DealerNet - Catalog" doc:id="50811f0d-b911-4e38-ab00-d2a8cbce35d7">
+						<ee:message>
+							<ee:set-payload resource="dwl/map-optionals-catalog.dwl" />
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="6a67978c-3150-48ed-a348-b7c2d573e823" size="200" preserveMimeTypes="true">
+						<ee:transform doc:name="Aggregate payload" doc:id="4b93b623-d95e-4585-8f1a-9252c526965b">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<salesforce-sapi:create-optional doc:name="Create optional" doc:id="03cc635b-4f7d-4c35-bef3-7a7cb1a112de" client-id="bf0b64df2edc4bd7a4ae38a5140a441f" config-ref="Salesforce_sapi_Config" client-secret="265b41f051d94f28A1AB62018296E99b" />
+						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="8ef3db45-2d99-4c8f-b3e0-16da42a7e4bd" message="Integration: Send Linked Optionals | Checkpoint: After send to SF | correlationId: #[correlationId]  | payload #[payload]" />
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete>
+				<ee:transform doc:name="Results" doc:id="6d6d701d-5918-407c-bbbd-56f0d917260c">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+						<logger level="INFO" doc:name="Logger Results for Optionals Catalog" doc:id="e9ef85ad-6d82-4ebb-8580-af7c01ff629f" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+			</route>
+			<route >
+				<dealernet-sapi:get-vehicles-optional-features search-type="linked" doc:name="Get Vehicles Optional Features - Linked" doc:id="d56e895c-0a2c-46dc-bdc4-addb10799679" config-ref="Dealernet_sapi_Config" client-id="bf0b64df2edc4bd7a4ae38a5140a441f" client-secret="265b41f051d94f28A1AB62018296E99b"/>
+				<logger level="INFO" doc:name="Logger" doc:id="dbe85c48-6706-4c37-8566-46c521915627" />
+				<batch:job jobName="send_optionals_linked_BatchJob" doc:id="40524496-6f03-4be8-9cf6-64cb1c3d91ee" >
+					<batch:process-records >
+						<batch:step name="Send_Linked_Batch_Step" doc:id="0042a135-a09e-4dc1-bc1d-baa820a447cf">
+					<ee:transform doc:name="Map Optionals Payload From Dealernet - Linked" doc:id="aeb8c708-ad28-49d8-99f6-5380ca8b0496">
+						<ee:message>
+							<ee:set-payload resource="dwl/map-optionals-linked.dwl" />
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="835b7d81-c4c8-4c4e-a88c-d909df4a8747" size="200" preserveMimeTypes="true">
+						<ee:transform doc:name="Aggregate payload" doc:id="e9a3672d-5207-4f0c-a879-ceb2787ce0c2">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<salesforce-sapi:create-optional doc:name="Create optional" doc:id="0b34f6d6-2cf7-4859-8558-81660f9ce940" config-ref="Salesforce_sapi_Config" client-id="bf0b64df2edc4bd7a4ae38a5140a441f" client-secret="265b41f051d94f28A1AB62018296E99b" />
+						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="d5ab193b-5073-4036-af72-3e14ad007426" message="Integration: Send Linked Optionals | Checkpoint: After send to SF | correlationId: #[correlationId]  | payload #[payload]" />
+					</batch:aggregator>
+				</batch:step>
+					</batch:process-records>
+					<batch:on-complete >
+						<ee:transform doc:name="Results" doc:id="8826b313-87e0-4277-a675-55bd584c3ee1" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger Results for Linked Optionals" doc:id="5c0f9528-3204-41f1-adce-1b33a6fc7e68" message="#[payload]"/>
+					</batch:on-complete>
+				</batch:job>
+			</route>
+		</scatter-gather>
+		<error-handler ref="globalError_Router" />
+	</flow>
+</mule>

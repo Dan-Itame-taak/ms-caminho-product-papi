@@ -1,0 +1,109 @@
+#%RAML 1.0
+title: product-papi
+version: 1.0.0
+protocols: [ HTTP, HTTPS ]
+mediaType: application/json
+
+types:
+  StockItem:
+    type: object
+    description: Item de estoque de veículo (DealerNet)
+    properties:
+      ModeloVeiculo_Descricao?: string
+      Veiculo_Descricao?: string
+      Veiculo_Codigo?: string
+      Veiculo_Chassi?: string
+      VeiculoAno_Exibicao?: string
+      Cor_Descricao_Interna?: string
+      Cor_Descricao_Externa?: string
+      Usuario_Codigo?: string
+      Pessoa_Codigo?: string
+      Pessoa_Nome_Concessionaria?: string
+      Veiculo_Placa?: string
+      Veiculo_KM?: number
+      Veiculo_EstadoCod_Placa?: string
+      Veiculo_NroRenavam?: string
+      Veiculo_DataVendaOriginal?: string
+      Veiculo_Ativo?: string
+      Veiculo_KmMedio?: number
+      Veiculo_DataEmplacamento?: string
+      Veiculo_DataEntrega?: string
+      Veiculo_PesoLiquido?: number
+      Veiculo_PesoBruto?: number
+  StockDealernetResponse:
+    type: StockItem[]
+
+  ProductItem:
+    type: object
+    description: Item de produto (DealerNet / Grupo Caminho)
+    properties:
+      Produto_Codigo?: string
+      Produto_Descricao?: string
+      Produto_DescricaoDetalhada?: string
+      Produto_Ativo?: string
+      Produto_Estocavel?: string
+      Produto_UnidadeCod?: string
+      Produto_NCMCod?: string
+      Produto_Imagem?: string
+      Produto_CodigoANP?: string
+      Produto_TipoSucata?: string
+      Produto_Cest?: string
+      Produto_Peso?: number
+      Produto_PermiteArredondarTruncar?: string
+      Produto_ProcedenciaCod?: string
+      Produto_QtdeFracionada?: string
+      ProdutoMarca_Referencia?: string
+      TipoProduto_Descricao?: string
+      GrupoProduto_Descricao?: string
+  ProductDealernetResponse:
+    type: ProductItem[]
+
+/stock:
+  get:
+    displayName: Obter estoque
+    headers:
+      client_id:
+        type: string
+        required: true
+      client_secret:
+        type: string
+        required: true
+    responses:
+      200:
+        body:
+          application/json:
+            type: StockDealernetResponse
+      400:
+        body:
+          application/json:
+      401:
+        body:
+          application/json:
+      500:
+        body:
+          application/json:
+
+/product:
+  get:
+    displayName: Obter produto
+    headers:
+      client_id:
+        type: string
+        required: true
+      client_secret:
+        type: string
+        required: true
+    responses:
+      200:
+        body:
+          application/json:
+            type: ProductDealernetResponse
+      400:
+        body:
+          application/json:
+      401:
+        body:
+          application/json:
+      500:
+        body:
+          application/json:

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dealernet-sapi="http://www.mulesoft.org/schema/mule/dealernet-sapi" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schema/mule/dealernet-sapi/current/mule-dealernet-sapi.xsd">
+	<sub-flow name="get-products-stock" doc:id="4d4128c0-1054-44eb-906f-322841c718e7" >
+		<logger level="INFO" doc:name="Logger Start Get Products Stock" doc:id="30cada4a-f37c-4b19-8ae4-2aa2935484a6" />
+		<dealernet-sapi:get-products-stock doc:name="Get Products Stock" doc:id="44d02bfa-b0e8-455a-a59d-d811e52df479" config-ref="Dealernet_sapi_Config" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" />
+		<logger level="INFO" doc:name="Logger After Get Products Stock" doc:id="b687d05e-47bc-4eec-977b-2a74b2892036" message="Integration: send-assets-stock-to-salesforce | Returned Payload Model: #[payload[0]]" />
+	</sub-flow>
+	<sub-flow name="get-tmo-catalog" doc:id="85857174-d11c-40ff-a079-5f07eb689cd7" >
+		<logger level="INFO" doc:name="Logger Before Get TMO Catalog" doc:id="403effaf-c73d-4662-a6b1-646afa348e0f" />
+		<dealernet-sapi:get-tmo-catalog doc:name="Get TMO Catalog" doc:id="e8f25481-0432-4fb0-9dd0-249fa18cfa97" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config"/>
+	</sub-flow>
+	<sub-flow name="get-hourly-rate" doc:id="3b480c2d-a818-45d9-b754-1adfcc455b6c" >
+		<logger level="INFO" doc:name="Logger Before Get TMO Hourly Rate" doc:id="b28a6ddb-65fe-418c-9836-7643ef3827ba" />
+		<dealernet-sapi:get-value-of-hourly-rate doc:name="Get value of hourly rate" doc:id="572b4f6d-d51b-4ea4-9733-65e1eeec1bf9" config-ref="Dealernet_sapi_Config" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}"/>
+	</sub-flow>
+</mule>

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce-sapi="http://www.mulesoft.org/schema/mule/salesforce-sapi"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:dealernet-sapi="http://www.mulesoft.org/schema/mule/dealernet-sapi"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schema/mule/dealernet-sapi/current/mule-dealernet-sapi.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd">
+	<!-- [STUDIO:"send-assets-list"]<flow name="send-assets-list" doc:id="feda5b02-f467-4947-9758-d5e6f657d8cc" initialState="stopped">
+		<scheduler doc:name="Scheduler 1 hora" doc:id="97d05da4-6a3e-4ba8-acd9-3801f8246eef" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="60" startDelay="100" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Logger Start Get Assets List" doc:id="40db9d20-120e-4dbc-bebb-ddd08ad37dd4" />
+		<dealernet-sapi:get-vehicles-list doc:name="Get Vehicles List" doc:id="835fa4cd-9ac4-476d-9f1c-f36e1bde0425" client-id="265b41f051d94f28A1AB62018296E99b" client-secret="265b41f051d94f28A1AB62018296E99b" config-ref="Dealernet_sapi_Config"/>
+		<logger level="INFO" doc:name="Logger After Get Assets List" doc:id="4c4c0134-42be-4125-a132-a8c50908893f" message="Integration: send-assets-stock-to-salesforce | Size: #[sizeOf(payload)&#93; |  Returned Payload Model: #[payload[0&#93;&#93;" />
+		<batch:job jobName="send_assets_BatchJob" doc:id="cd722c27-6bdc-4d61-9091-f2746deee8ef" >
+			<batch:process-records >
+				<batch:step name="Batch_Step1" doc:id="3ff1ae06-f7c3-484a-8c21-461875a764ea" >
+					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="8a89ef66-4fe0-408d-a26e-7220eb4287fd">
+			<ee:message>
+				<ee:set-payload resource="dwl/map-asset-dealernet.dwl" />
+			</ee:message>
+		</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="90bde744-e393-4cfc-a2a7-be20239c51ca" size="200" preserveMimeTypes="true">
+						<ee:transform doc:name="Aggregate payload" doc:id="7610dc34-6b0b-429e-8d8e-1aed13cd6323" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+	allOrNone: false,
+	records: payload
+}&#93;&#93;></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="e486afad-bbfa-458a-b597-cc3aeb3fddf5" message="payload #[payload&#93;" />
+						<salesforce-sapi:create-product doc:name="Create product" doc:id="78461cfb-7307-4afc-a26f-1e8e97f9197e" config-ref="Salesforce_sapi_Config" client-id="265b41f051d94f28A1AB62018296E99b" client-secret="265b41f051d94f28A1AB62018296E99b"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<ee:transform doc:name="Results" doc:id="cfee492c-c5fe-46d0-a665-906fd5d3cb2f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="Logger Finish Get Assets List" doc:id="7b2c9336-16d7-4cfa-99fe-2e43b22c098c" />
+		<error-handler ref="globalError_Router" />
+	</flow> [STUDIO] -->
+	<flow name="send-assets-stock-to-salesforce" doc:id="bde8ad02-4276-4496-ac56-2519ca82a2ca" >
+		<scheduler doc:name="Scheduler 1 hora" doc:id="5ab52d0a-41f9-490a-8328-414aa0560279" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="60" timeUnit="MINUTES" startDelay="10"/>
+			</scheduling-strategy>
+		</scheduler>
+		<dealernet-sapi:get-assets-stock doc:name="Get Assets Stock" doc:id="de0890ff-31ee-45e1-bc27-9720602bb039" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config"/>
+		<logger level="INFO" doc:name="Logger After Get Assets Stock" doc:id="ea0223ed-7317-43ca-ade2-0fc0d80cd453" message="Integration: send-assets-stock-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] "/>
+		<batch:job jobName="send_assets_stock_BatchJob" doc:id="8548ad63-bc1b-451a-9fa0-46d3a74c5244" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="7a746b7c-a8da-45b8-9b4b-db0128488212" >
+					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="61e5e7fe-5ed0-4fca-841d-3df4dc62201c">
+			<ee:message>
+				<ee:set-payload resource="dwl/map-asset-stock.dwl" />
+			</ee:message>
+		</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="924c97d0-6f09-4d66-9d0f-7a16814420ce" size="200" preserveMimeTypes="true">
+						<ee:transform doc:name="Aggregate payload" doc:id="bcbc52d6-6a7f-4627-a261-69d597e6d123" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="0832bc67-9216-49e8-afba-84f7826572ee" message="payload #[payload]"/>
+						<salesforce-sapi:create-stock doc:name="Create stock" doc:id="d19002d7-b16f-4b17-b91f-7fde2cb8ccb2" client-id="bf0b64df2edc4bd7a4ae38a5140a441f" client-secret="265b41f051d94f28A1AB62018296E99b" config-ref="Salesforce_sapi_Config"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<ee:transform doc:name="Results" doc:id="52ac3f92-4804-42a5-a1d9-e315b420340c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="Logger Finish Get Assets Stock" doc:id="973a0b4f-6501-4651-9118-d147fbc819ce" />
+		<error-handler ref="globalError_Router" />
+	</flow>
+	<flow name="send-vehicle-year-model-to-salesforce" doc:id="de8b684c-8ec7-4791-a3f7-62fde6f1cf5c" >
+		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="32a7fbd5-fd5c-4387-b286-931f9d366fb0" >
+			<scheduling-strategy >
+				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo"/>
+			</scheduling-strategy>
+		</scheduler>
+		<dealernet-sapi:get-vehicles-modelmanufactory-year doc:name="Get Vehicles Model/Manufactory Year" doc:id="5c1f32a6-f63a-4754-a338-2e07ac5a5870" config-ref="Dealernet_sapi_Config" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}"/>
+		<ee:transform doc:name="Variables to Get Record Type Id - Collor" doc:id="7d47b6db-a365-41ac-8bcc-76a51c5f1a55">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="object"><![CDATA[%dw 2.0
+output application/json
+---
+"VehicleParameter__c"]]></ee:set-variable>
+				<ee:set-variable variableName="name"><![CDATA[%dw 2.0
+output application/json
+---
+"Ano"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="get-recordType - Year" doc:id="4e16ec8f-251f-45fa-b3b5-b4aa75cb4f52" name="get-recordType" target="recordTypeYear"/>
+		<logger level="INFO" doc:name="Logger After Get Vehicle Model/Manufactory Year" doc:id="c90fbe70-8858-452c-9801-7d9edfaf1252" message="Integration: send-vehicle-model-and-manufactury-year-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] "/>
+		<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="b61e2479-aa20-4861-9357-3a336065e4a6" >
+			<ee:message >
+				<ee:set-payload resource="dwl/map-vehicles-yearModel.dwl" />
+			</ee:message>
+		</ee:transform>
+		<salesforce-sapi:send-vehicles-modelmanufactory-year doc:name="Send Vehicles Model/Manufactory Year" doc:id="cfb7b27e-13e3-4356-86b3-19c82ff4afc6" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0857e948-362c-4c24-89f4-003cbb43e19a" message="#[payload]"/>
+		<error-handler ref="globalError_Router" />
+	</flow>
+	<flow name="send-vehicle-collor-to-salesforce" doc:id="be2760c9-399d-4121-a3a2-234ec0e83ee2" >
+		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="7141f249-c4c4-4e0f-8222-e519dc8db968" >
+			<scheduling-strategy >
+				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo"/>
+			</scheduling-strategy>
+		</scheduler>
+		<dealernet-sapi:get-vehicle-collor-list doc:name="Get Vehicle Collor List" doc:id="9d83096b-92f2-4996-8c7f-cfae8efc0ac2" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config"/>
+		<ee:transform doc:name="Variables to Get Record Type Id - Collor" doc:id="83c56f9b-48b5-4478-820c-df9bf6e6bf38" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="object" ><![CDATA[%dw 2.0
+output application/json
+---
+"VehicleParameter__c"]]></ee:set-variable>
+				<ee:set-variable variableName="name" ><![CDATA[%dw 2.0
+output application/json
+---
+"Cor"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="get-recordType - Collor" doc:id="60666ef7-4cdb-48b7-a8d5-001f8e1f5784" name="get-recordType" target="recordTypeCor"/>
+		<logger level="INFO" doc:name="Logger After Get Vehicle Model/Manufactory Year" doc:id="e82934fd-5533-4278-a8ce-5caa1b882a41" message="Integration: send-vehicle-collor-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
+		<batch:job jobName="send_vehicle_collor_batchJob" doc:id="43e2456a-aece-4b18-94ed-5da7ef88a088" blockSize="1000" maxFailedRecords="-1">
+			<batch:process-records >
+				<batch:step name="Batch_Step1" doc:id="741033eb-a6bf-4c7e-8057-642e11d5b605" >
+					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="ddb9f43f-e8d6-44d5-bde7-72564f545c77" >
+						<ee:message >
+							<ee:set-payload resource="dwl/map-vehicles-collor.dwl" />
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="c279da1e-a975-4ccb-b72e-1870c335f6b8" size="200" preserveMimeTypes="true">
+						<ee:transform doc:name="Aggregate payload" doc:id="9907b7bf-e88c-458a-9a54-f059de820100" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<salesforce-sapi:send-vehicle-collor-list doc:name="Send Vehicle Collor List" doc:id="7d19e70e-a8f6-4274-8ed7-4fb32fd19708" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="467e1cc9-8acc-4dce-8503-9fe5d068bde1" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+		<error-handler ref="globalError_Router" />
+	</flow>
+	<flow name="send-vehicle-models-to-salesforce" doc:id="3edfd420-91b7-4ff0-b9d0-ce8f9646bf0a" >
+		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="8e328193-0dba-4ff3-ab49-330db3635fa0" >
+			<scheduling-strategy >
+				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo"/>
+			</scheduling-strategy>
+		</scheduler>
+		<dealernet-sapi:get-vehicle-models doc:name="Get Vehicle Models" doc:id="8efb4654-76dc-4df4-878c-cc6093b8081c" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config"/>
+		<ee:transform doc:name="Variables to Get Record Type Id - Collor" doc:id="57db392c-3b5f-4c2a-8877-7c08cb4bbc3f">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="object"><![CDATA[%dw 2.0
+output application/json
+---
+"VehicleParameter__c"]]></ee:set-variable>
+				<ee:set-variable variableName="name"><![CDATA[%dw 2.0
+output application/json
+---
+"Modelo"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="get-recordType - Models" doc:id="f7cf0d42-b640-44bc-abc6-514a134441f5" name="get-recordType" target="recordTypeModel"/>
+		<logger level="INFO" doc:name="Logger After Get Vehicle Model/Manufactory Year" doc:id="f44f7eba-66f0-4bda-b27f-499d7c205065" message="Integration: send-vehicle-model-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
+		<batch:job jobName="send_vehicle_models_batchJob" doc:id="56e0769f-91b8-4df0-9c49-955f0bf00599" maxFailedRecords="-1" blockSize="1000">
+			<batch:process-records >
+				<batch:step name="Batch_Step3" doc:id="eac3fccc-e506-4134-8edc-637c67f2e580" >
+					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="4523d992-3021-4f64-ac38-afa3c9e4acc5" >
+						<ee:message >
+							<ee:set-payload resource="dwl/map-vehicles-models.dwl" />
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="818bcfd5-6b69-420f-81ed-1fa76b67e501" size="200" preserveMimeTypes="true">
+						<ee:transform doc:name="Aggregate payload" doc:id="985b74c6-30c8-4e52-9e80-13991aac018d" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<salesforce-sapi:send-vehicle-models doc:name="Send Vehicle Models" doc:id="12cefc5a-80af-441a-acde-13b95ddbbe32" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete>
+				<logger level="INFO" doc:name="Logger" doc:id="189d29ae-6500-47b9-a0da-2f4ffde4f06a" message="#[payload]" />
+			</batch:on-complete>
+		</batch:job>
+		<error-handler ref="globalError_Router" />
+	</flow>
+</mule>

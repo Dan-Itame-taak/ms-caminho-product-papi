@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce-sapi="http://www.mulesoft.org/schema/mule/salesforce-sapi"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd
+		http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<!-- Operação upsert-asset: requer que o connector mule-plugin-salesforce-sapi exponha esta operação (upsert Asset por ExternalIdentifier). -->
+	<flow name="send-asset-to-salesforce" doc:id="send-asset-to-salesforce-flow" >
+		<logger level="INFO" doc:name="Logger Before Upsert Asset" message="Integration: send-asset-to-salesforce | correlationId: #[correlationId] | payload: #[payload] " />
+		<salesforce-sapi:create-stock doc:name="Create stock" doc:id="jvtnkk" client-id="123" client-secret="123" config-ref="Salesforce_sapi_Config"/>
+		<logger level="INFO" doc:name="Logger After Upsert Asset" message="#[%dw 2.0 output application/json --- { correlationId: correlationId, status: vars.httpStatus, payload: payload }]"/>
+		<error-handler ref="globalError_Router" />
+	</flow>
+	<!-- Envio de Product (Product2) para Salesforce SAPI em formato patch. Se o connector expuser operação patch-product, substituir por ela. -->
+	<sub-flow name="send-products-to-salesforce" doc:id="6b6e05cd-2f2c-4493-b092-f61f79fc205c" >
+		<logger level="INFO" doc:name="Logger Before Upsert Asset" doc:id="93424524-e176-425f-bdb1-e856c9f81061" message="Integration: send-product-to-salesforce | correlationId: #[correlationId] | payloadSize: #[sizeOf(payload.records)] " />
+		<salesforce-sapi:create-product doc:name="Create product" doc:id="41a059e3-802e-46f1-803c-b8cecaf1bba6" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
+		<logger level="INFO" doc:name="Logger After Upsert Asset" doc:id="485f9366-c64e-4f76-97ff-9c2dc0db07b8" message="#[%dw 2.0 output application/json --- { correlationId: correlationId, status: vars.httpStatus, payload: payload }]" />
+	</sub-flow>
+	<sub-flow name="get-recordType" doc:id="7355f89e-9197-4655-a6e3-2772697ebaaa" >
+		<logger level="INFO" doc:name="Logger" doc:id="fac7e5f8-f1bd-4cb0-9ab3-6d7a1a5d8a82" message="Integration: search-recordType | correlationId: #[correlationId] | Object: #[vars.object] | Name: #[vars.name]" />
+		<salesforce-sapi:retrieve-id-of-recordtype doc:name="Retrieve ID of RecordType" doc:id="3011522a-809d-4547-92fe-191fe0c908e1" object="#[vars.object]" sc-name="#[vars.name]" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}" config-ref="Salesforce_sapi_Config"/>
+	</sub-flow>
+	<sub-flow name="send-hourly-rate-to-salesforce" doc:id="5e7f523f-eb36-41b1-a3a5-33a58ca4060a" >
+		<logger level="INFO" doc:name="Logger" doc:id="8d311176-8e92-498a-9230-48a6af47472a" />
+		<salesforce-sapi:send-values-of-hourly-rate doc:name="Send Values of Hourly Rate" doc:id="5e9a5637-f43c-448e-8d36-898bb973d5ba" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}" config-ref="Salesforce_sapi_Config"/>
+		<logger level="INFO" doc:name="Logger After Upsert Asset" doc:id="ee1effd5-ae58-45de-910b-9d9a5703f3e0" message="#[%dw 2.0 output application/json --- { correlationId: correlationId, status: vars.httpStatus, payload: payload }]" />
+	</sub-flow>
+</mule>
