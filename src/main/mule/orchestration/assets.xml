@@ -11,37 +11,31 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schema/mule/dealernet-sapi/current/mule-dealernet-sapi.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd">
-	<!-- [STUDIO:"send-assets-list"]<flow name="send-assets-list" doc:id="feda5b02-f467-4947-9758-d5e6f657d8cc" initialState="stopped">
+	<flow name="send-assets-list-to-salesfore-flow" doc:id="feda5b02-f467-4947-9758-d5e6f657d8cc">
 		<scheduler doc:name="Scheduler 1 hora" doc:id="97d05da4-6a3e-4ba8-acd9-3801f8246eef" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="60" startDelay="100" timeUnit="MINUTES"/>
 			</scheduling-strategy>
 		</scheduler>
 		<logger level="INFO" doc:name="Logger Start Get Assets List" doc:id="40db9d20-120e-4dbc-bebb-ddd08ad37dd4" />
-		<dealernet-sapi:get-vehicles-list doc:name="Get Vehicles List" doc:id="835fa4cd-9ac4-476d-9f1c-f36e1bde0425" client-id="265b41f051d94f28A1AB62018296E99b" client-secret="265b41f051d94f28A1AB62018296E99b" config-ref="Dealernet_sapi_Config"/>
-		<logger level="INFO" doc:name="Logger After Get Assets List" doc:id="4c4c0134-42be-4125-a132-a8c50908893f" message="Integration: send-assets-stock-to-salesforce | Size: #[sizeOf(payload)&#93; |  Returned Payload Model: #[payload[0&#93;&#93;" />
-		<batch:job jobName="send_assets_BatchJob" doc:id="cd722c27-6bdc-4d61-9091-f2746deee8ef" >
+		<dealernet-sapi:get-vehicles-list doc:name="Get Vehicles List" doc:id="835fa4cd-9ac4-476d-9f1c-f36e1bde0425" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config" time-amount="500"/>
+		<logger level="INFO" doc:name="Logger After Get Assets List" doc:id="4c4c0134-42be-4125-a132-a8c50908893f" message="Integration: send-assets-list-to-salesforce | Size: #[sizeOf(payload)] |  Returned Payload Model: #[payload[0]]" />
+		<batch:job jobName="send_assets_BatchJob" doc:id="cd722c27-6bdc-4d61-9091-f2746deee8ef" maxFailedRecords="-1" blockSize="1000" maxConcurrency="1">
 			<batch:process-records >
 				<batch:step name="Batch_Step1" doc:id="3ff1ae06-f7c3-484a-8c21-461875a764ea" >
-					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="8a89ef66-4fe0-408d-a26e-7220eb4287fd">
-			<ee:message>
-				<ee:set-payload resource="dwl/map-asset-dealernet.dwl" />
-			</ee:message>
-		</ee:transform>
 					<batch:aggregator doc:name="Batch Aggregator" doc:id="90bde744-e393-4cfc-a2a7-be20239c51ca" size="200" preserveMimeTypes="true">
-						<ee:transform doc:name="Aggregate payload" doc:id="7610dc34-6b0b-429e-8d8e-1aed13cd6323" >
-							<ee:message >
-								<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
-&#45;&#45;-
-{
-	allOrNone: false,
-	records: payload
-}&#93;&#93;></ee:set-payload>
-							</ee:message>
-						</ee:transform>
-						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="e486afad-bbfa-458a-b597-cc3aeb3fddf5" message="payload #[payload&#93;" />
-						<salesforce-sapi:create-product doc:name="Create product" doc:id="78461cfb-7307-4afc-a26f-1e8e97f9197e" config-ref="Salesforce_sapi_Config" client-id="265b41f051d94f28A1AB62018296E99b" client-secret="265b41f051d94f28A1AB62018296E99b"/>
+						<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="8a89ef66-4fe0-408d-a26e-7220eb4287fd">
+			<ee:message>
+			</ee:message>
+						<ee:variables>
+							<ee:set-variable resource="dwl/map-asset-dealernet.dwl" variableName="assetPayload" />
+							<ee:set-variable resource="dwl/map-account-dealernet.dwl" variableName="accountPayload">
+						</ee:set-variable>
+						</ee:variables>
+		</ee:transform>
+						<logger level="INFO" doc:name="Logger" doc:id="2529d278-95ca-461d-9ff9-6a8b9f740836" />
+						<flow-ref doc:name="create-account-in-salesforce" doc:id="8a940acd-2296-4650-93d0-0d1a4102f583" name="create-accounts-in-salesforce"/>
+						<flow-ref doc:name="create-asset-in-salesforce" doc:id="84f5a941-3381-4bc7-9203-d167c7b5a374" name="create-assets-in-salesforce"/>
 					</batch:aggregator>
 				</batch:step>
 			</batch:process-records>
@@ -50,15 +44,45 @@ output application/json
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
-&#45;&#45;-
-payload&#93;&#93;></ee:set-payload>
+---
+payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 			</batch:on-complete>
 		</batch:job>
 		<logger level="INFO" doc:name="Logger Finish Get Assets List" doc:id="7b2c9336-16d7-4cfa-99fe-2e43b22c098c" />
 		<error-handler ref="globalError_Router" />
-	</flow> [STUDIO] -->
+	</flow>
+	<sub-flow name="create-accounts-in-salesforce" doc:id="0c4ac43f-8b6f-4d29-9290-a6d51d311a8c" >
+		<ee:transform doc:name="Aggregate payload - Accounts" doc:id="77bb9877-7bb9-4db9-ba47-23e47e56dc26" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: vars.accountPayload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="d9998ef6-6f92-49e3-9831-3626f85bd334" message="Integration: send-assets-list-to-salesforce | Size: #[sizeOf(payload)] |  Returned Payload Model: #[payload[0]]" />
+		<flow-ref doc:name="send-account-to-salesforce" doc:id="80bcc802-4651-4f1b-856f-c20161a9e3e7" name="send-account-to-salesforce"/>
+	</sub-flow>
+	<sub-flow name="create-assets-in-salesforce" doc:id="36dda9ba-19f9-45af-b38a-79d0a688fda0" >
+		<ee:transform doc:name="Aggregate payload - Assets" doc:id="16c74b9b-8557-4bf4-a85b-8f6c41b98f81" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: vars.assetPayload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="364bd0cc-d10c-45bd-acbb-d5f64d5f856a" message="Integration: send-assets-list-to-salesforce | Size: #[sizeOf(payload)] |  Returned Payload Model: #[payload[0]]" />
+		<flow-ref doc:name="send-assets-to-salesforce" doc:id="b2b84ed9-0145-4b7e-a44a-cce961d03760" name="send-assets-to-salesforce" />
+	</sub-flow>
 	<flow name="send-assets-stock-to-salesforce" doc:id="bde8ad02-4276-4496-ac56-2519ca82a2ca" >
 		<scheduler doc:name="Scheduler 1 hora" doc:id="5ab52d0a-41f9-490a-8328-414aa0560279" >
 			<scheduling-strategy >

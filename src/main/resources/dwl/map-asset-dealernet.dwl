@@ -1,19 +1,29 @@
 %dw 2.0
 output application/json
 ---
-{
-  "Chassis__c": payload.Chassi,
-  "Plate__c": payload.Placa,
-  "Model__c": payload."Modelo do Veiculo",
-  "ModelBrand__c": payload."Modelo do Veiculo",
-  "MolicarCode__c": payload."Cod Molicar",
-  "LastKmImformed__c": payload."Km Veiculo",
-  "YearModelDealer__c": payload."Ano do Modelo",
-  "YearOfManufacture__c": payload."Ano Fabricacao",
-  "StatePlate__c": payload."Nome Estado/UF da Placa)",
-  "ExternalColorCode__c": payload."Codigo da Cor",
-  "ColorName__c": payload.Cor,
-  "Renavam__c": payload.Renavam,
-  "StockType__c": payload."Tipo do Estoque",
-  "StockDescription__c": payload."Descricao do Estoque"
+payload map (value, index) -> {
+	"attributes": {
+		"type": "Asset"
+	},
+	"Account": {
+        "DealerNetExternalId__c": value.codigoCliente
+    },
+	"ExternalId__c": value.codigoVeiculo,
+	"Name": value.nomeVeiculo,
+	"Chassis__c": value.chassi,
+	"FullChassisNumber__c": value.chassi,
+	"Type__c": "Vehicle",
+	"Status": "Faturado",
+	"Plate__c": value.placa,
+	"Model__c": value.nomeVeiculo,
+	"ModelCode__c": value.codigoModeloVeiculo,
+	"ModelBrand__c": value.marca,
+	"LastKmImformed__c": value.km,
+	"YearModel__c": value.anoModelo,
+	"YearOfManufacture__c": value.anoFabricacao,
+	"ColorName__c": value.corExterna,
+	"Renavam__c": value.renavam,
+	"NumberOfDoors__c": value.numeroPortas,
+	"Combustivel__c": if (value.combustivel contains  ("HIBRIDO")) "Híbrido" else value.combustivel,
+	"ProductFamilyDescription__c": value.familiaFamilia
 }
