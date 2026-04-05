@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schema/mule/dealernet-sapi/current/mule-dealernet-sapi.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd">
-	<flow name="send-products-flow" doc:id="5b6947db-5f95-453d-bc9c-e92393190845">
+	<flow name="send-products-flow" doc:id="5b6947db-5f95-453d-bc9c-e92393190845" initialState="stopped">
 		<scheduler doc:name="Scheduler 1 hora" doc:id="68353a86-310d-4df3-b046-ea3138eec5ff" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="60" startDelay="10" timeUnit="MINUTES" />

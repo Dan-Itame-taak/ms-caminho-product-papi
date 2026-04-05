@@ -1,7 +1,8 @@
 %dw 2.0
+var vPayload = (payload) distinctBy $.codigoCliente
 output application/json
 ---
-payload map (value, index) -> {
+vPayload map (value, index) -> {
   "attributes": {
       "type": "Account"
   },

@@ -24,6 +24,8 @@ payload map (value, index) -> {
 	"ColorName__c": value.corExterna,
 	"Renavam__c": value.renavam,
 	"NumberOfDoors__c": value.numeroPortas,
-	"Combustivel__c": if (value.combustivel contains  ("HIBRIDO")) "Híbrido" else value.combustivel,
+	"Combustivel__c": if (value.combustivel contains  ("HIBRIDO")) "Híbrido" 
+	else if (value.combustivel contains ("NENH")) null
+	else value.combustivel,
 	"ProductFamilyDescription__c": value.familiaFamilia
 }

@@ -5,7 +5,7 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
-	<flow name="send-tmo-flow" doc:id="570a8112-cfd9-4bbc-8edb-0b32f2c51c12" >
+	<flow name="send-tmo-flow" doc:id="570a8112-cfd9-4bbc-8edb-0b32f2c51c12" initialState="stopped">
 		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="d3f7686a-0721-4ac7-8bd9-6191f543838f" >
 			<scheduling-strategy >
 				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo" />
@@ -69,7 +69,7 @@ output application/java
 			</batch:on-complete>
 		</batch:job>
 	</flow>
-	<flow name="send-tmo-hourly-rate-flow" doc:id="8a7aa2f4-58c9-4bc1-a322-5e66c6df6d07" >
+	<flow name="send-tmo-hourly-rate-flow" doc:id="8a7aa2f4-58c9-4bc1-a322-5e66c6df6d07" initialState="stopped">
 		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="9bddb191-e8d6-4c1d-a25a-f81d1794f160" >
 			<scheduling-strategy >
 				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo" />
