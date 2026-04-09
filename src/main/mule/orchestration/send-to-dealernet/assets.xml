@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="send-asset-to-dealernet-main" doc:id="4c3b0cdc-f649-4d2b-8147-649329a64d1d" >
+		<ee:transform doc:name="Variables to Get Asset Information" doc:id="956a3fb2-dd14-4684-a761-e105def069b7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    allOrNone: true,
+    compositeRequest: [
+        {
+            method: "GET",
+            url: "/services/data/v63.0/query?q=SELECT " ++
+                "Id, " ++
+                "Name, " ++
+                "Chassis__c, " ++
+                "YearModelCode__c, " ++
+                "ModelCode__c, " ++
+                "InternalColorCode__c, " ++
+                "ExternalColorCode__c, " ++
+                "Account.ExternalId__c, " ++
+                "Store__r.DealerNetExternalId__c, " ++
+                "Plate__c, " ++
+                "LastKmImformed__c, " ++
+                "Renavam__c, " ++
+                "DeliveryDate__c, " ++
+                "StockType__c, " ++
+                "Createdby.DealerNetCode__c, " ++
+                "CreatedDate " ++
+                "FROM Asset WHERE Id = '" ++ vars.assetId ++ "'",
+            referenceId: "Ativo"
+        }
+    ]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="generic-composite-salesforce" doc:id="4514cd67-184f-4ebe-b7f3-832f20bff75d" name="generic-composite-salesforce"/>
+		<ee:transform doc:name="Map Payload to Send Asset" doc:id="1abf1376-0b18-4993-9d06-f96d83edc58c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import * from Modules::productsFunctions
+output application/json
+var asset = payload.compositeResponse[0].body.records[0]
+---
+{
+    "Veiculo_Codigo": asset.Id,
+    "Veiculo_Descricao": asset.Name,
+    "Veiculo_Chassi": asset.Chassis__c,
+    "Veiculo_ExportaInternet": 0,                                  // sem mapeamento SF - default 0
+    "Veiculo_PromocaoInternet": 0,                                 // sem mapeamento SF - default 0
+    "VeiculoAno_Codigo": asset.YearModelCode__c,
+    "Veiculo_ModeloVeiculoCod": asset.ModelCode__c,
+    "Veiculo_CorCodInterna": asset.InternalColorCode__c,
+    "Veiculo_CorCodExterna": asset.ExternalColorCode__c,
+    "Veiculo_UsuarioCodVendedor": null,                            // sem mapeamento SF
+    "Veiculo_PessoaCodCliente": asset.Account.ExternalId__c,
+    "Veiculo_PessoaCodConcessionaria": asset.Store__r.DealerNetExternalId__c,
+    "Veiculo_Placa": asset.Plate__c,
+    "Veiculo_EstadoCod_Placa": null,                               // sem mapeamento SF
+    "Veiculo_MunicipioCod_Placa": null,                            // sem mapeamento SF
+    "Veiculo_Km": asset.LastKmImformed__c,
+    "Veiculo_PIC": null,                                           // sem mapeamento SF
+    "Veiculo_NroRenavam": asset.Renavam__c,
+    "Veiculo_UsoSevero": 0,                                        // sem mapeamento SF - default 0
+    "Veiculo_DataVendaOriginal": asset.DeliveryDate__c default now()[0 to 18],
+    "Veiculo_AdaptacaoVeiculoCod": 1,                              // sem mapeamento SF - default 1 (Normal)
+    "Veiculo_DataBaixaChassi": null,                               // sem mapeamento SF
+    "Veiculo_CertificadoGarantia": null,                           // sem mapeamento SF
+    "Veiculo_PendenteRevisaoEntrega": 0,                           // sem mapeamento SF - default 0
+    "Veiculo_Ativo": 1,                                            // sem mapeamento SF - default 1 (Ativo)
+    "Veiculo_UsuCodCriacao": asset.CreatedBy.DealerNetCode__c,
+    "Veiculo_DataCriacao": (asset.CreatedDate)[0 to 18] default now()[0 to 18],
+    "Veiculo_UsuCodAlteracao": null,                               // sem mapeamento SF
+    "Veiculo_DataAlteracao": null,                                 // sem mapeamento SF
+    "Veiculo_CombustivelIdoneo": 1,                             // sem mapeamento SF - obrigatório, verificar fonte
+    "Veiculo_ChassiCondicao": "N",                                 // sem mapeamento SF - default N
+    "Veiculo_Status": if(asset.StockType__c == "VN") "N" else "U",
+    "Veiculo_KmMedio": null,                                       // sem mapeamento SF
+    "Veiculo_ChassiSerie": null,                                   // sem mapeamento SF
+    "Veiculo_DataEmplacamento": null,                              // sem mapeamento SF
+    "GrupoMercadoria_Codigo": null,                                // sem mapeamento SF
+    "Veiculo_VendidoTerceiro": 0,                                  // sem mapeamento SF - default 0
+    "Veiculo_DataEntrega": null,                                   // sem mapeamento SF
+    "Veiculo_Timestamp": null,                                     // sem mapeamento SF
+    "Veiculo_DescricaoMontadora": null,                            // sem mapeamento SF
+    "Veiculo_FiatProfessional": null,                              // sem mapeamento SF
+    "Veiculo_Cest": null,                                          // sem mapeamento SF
+    "Veiculo_CodigoAplicacao": null,                               // sem mapeamento SF
+    "Veiculo_CodigoAtividade": null,                               // sem mapeamento SF
+    "Veiculo_PesoLiquido": null,                                   // sem mapeamento SF
+    "Veiculo_PesoBruto": null,                                     // sem mapeamento SF
+    "Veiculo_BloqueadoOS": null,                                   // sem mapeamento SF
+    "Veiculo_HyundaiGarantiaEstendida": null                       // sem mapeamento SF
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="send-asset-to-dealernet-sapi" doc:id="8ab01d9d-24bf-48c7-8ab1-b68acef9c11b" name="send-asset-to-dealernet-sapi"/>
+		<ee:transform doc:name="Response Payload" doc:id="e29c8e72-255a-4bfe-b1f2-09b1007b75c3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger Response Payload" doc:id="af77913a-f575-4b84-b56f-085c903cdd72" message="The Asset was sended successfully | Payload: #[payload]"/>
+	</sub-flow>
+</mule>

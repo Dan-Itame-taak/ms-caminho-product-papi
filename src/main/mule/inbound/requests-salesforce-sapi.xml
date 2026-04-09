@@ -42,4 +42,9 @@
 		</salesforce-sapi:create-account>
 		<logger level="INFO" doc:name="Logger After Upsert Accounts" doc:id="27b53d20-fc0b-437e-890e-6bba5c83d0dd" message="#[%dw 2.0 output application/json --- { correlationId: correlationId, status: vars.httpStatus, payload: payload }]" />
 	</sub-flow>
+	<sub-flow name="generic-composite-salesforce" doc:id="d9fe7395-2d00-4e7b-9c62-09079a18e54b" >
+		<logger level="INFO" doc:name="Logger Before Composite 25" doc:id="c81951f2-acea-4631-a384-2fe4d7178fa9" message="Integration: send-accounts-to-salesforce | correlationId: #[correlationId] | payloadSize: #[sizeOf(payload.records)]  | Payload Model: #[payload.records[0]]" />
+		<salesforce-sapi:composite-de_25-operaes doc:name="Composite de 25 operações" doc:id="fdcc98da-9cfc-410d-9656-8adb4b321053" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
+		<logger level="INFO" doc:name="Logger After Composit 25" doc:id="d8bae8c0-a385-485e-bded-afb89350e5dd" message="#[%dw 2.0 output application/json --- { correlationId: correlationId, status: vars.httpStatus, payload: payload }]" />
+	</sub-flow>
 </mule>

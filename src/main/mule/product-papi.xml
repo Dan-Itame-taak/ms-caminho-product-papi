@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
     <http:listener-config name="product-papi-httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="8082" />
+        <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="product-papi-config" api="api/product-papi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="product-papi-config" api="resource::3ef2b520-3a61-4eeb-b14c-cd1a42d10fb4:product-papi:1.0.4:raml:zip:product-papi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="product-papi-main">
         <http:listener config-ref="product-papi-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -44,32 +44,24 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="get:\stock:application\json:product-papi-config">
-    <logger doc:name="Logger" doc:id="sgzhhr"/>
-        <ee:transform doc:name="Set headers from request">
-            <ee:variables>
-                <ee:set-variable variableName="headers"><![CDATA[%dw 2.0
-output application/json
----
-{
-	client_id: attributes.headers.client_id,
-	client_secret: attributes.headers.client_secret
-}]]></ee:set-variable>
-            </ee:variables>
-        </ee:transform>
+    <flow name="get:\product:product-papi-config">
+        <logger level="INFO" message="get:\product:product-papi-config" />
     </flow>
-    <flow name="get:\product:application\json:product-papi-config">
-        <logger doc:name="Logger" message="GET /product - start"/>
-        <ee:transform doc:name="Set headers from request">
-            <ee:variables>
-                <ee:set-variable variableName="headers"><![CDATA[%dw 2.0
+    <flow name="get:\stock:product-papi-config">
+        <logger level="INFO" message="get:\stock:product-papi-config" />
+    </flow>
+    <flow name="post:\assets:application\json:product-papi-config">
+		<logger level="INFO" doc:name="Logger" doc:id="0988637b-bcab-4e44-9922-94a024623ab1" message="Integration: send-asset-to-dealernet | CorrelationId: #[correlationId] | Payload: #[payload]"/>
+		<ee:transform doc:name="Asset Id" doc:id="ceec2053-16a7-4146-922e-d9842a476e0a" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="assetId" ><![CDATA[%dw 2.0
 output application/json
 ---
-{
-	client_id: attributes.headers.client_id,
-	client_secret: attributes.headers.client_secret
-}]]></ee:set-variable>
-            </ee:variables>
-        </ee:transform>
+payload.id]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="send-asset-to-dealernet-main" doc:id="000f361f-0a6f-402e-bda1-93a5e718c56a" name="send-asset-to-dealernet-main"/>
     </flow>
 </mule>

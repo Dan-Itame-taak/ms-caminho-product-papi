@@ -17,4 +17,8 @@ http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schem
 		<logger level="INFO" doc:name="Logger Before Get TMO Hourly Rate" doc:id="b28a6ddb-65fe-418c-9836-7643ef3827ba" />
 		<dealernet-sapi:get-value-of-hourly-rate doc:name="Get value of hourly rate" doc:id="572b4f6d-d51b-4ea4-9733-65e1eeec1bf9" config-ref="Dealernet_sapi_Config" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}"/>
 	</sub-flow>
+	<sub-flow name="send-asset-to-dealernet-sapi" doc:id="c74c4bb5-b6fe-4332-8e5f-0d43135bc791" >
+		<logger level="INFO" doc:name="Logger Before Send Asset to DealerNet" doc:id="d420b2e7-9ec5-4245-93f3-ec3de174672e" message="Integration: #[vars.integration] | CorrelationId: #[correlationId] | Payload: #[payload]"/>
+		<dealernet-sapi:send-vehicle-to-dealernet doc:name="Send Vehicle to Dealernet" doc:id="23ce0a42-69c4-4fbf-bf6f-5ba4f43b54e7" config-ref="Dealernet_sapi_Config"/>
+	</sub-flow>
 </mule>
