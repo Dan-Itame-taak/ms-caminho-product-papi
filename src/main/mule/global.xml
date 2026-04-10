@@ -30,31 +30,25 @@ http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schem
 			<ee:transform doc:name="Error Payload" doc:id="d0f304b8-96b1-4dad-83c0-a66c5b58301c" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload.cause != null) error.exception.errorMessage.payload.cause
-else if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Bad Request",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload.cause != null) error.exception.errorMessage.payload.cause
-else if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Bad Request",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
@@ -65,31 +59,25 @@ output application/json
 			<ee:transform doc:name="Error Payload" doc:id="7db0ca7b-ee6b-480e-a9f5-b18d0c6f95c5" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload.cause != null) error.exception.errorMessage.payload.cause.message
-else if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Unauthorized",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[401]]></ee:set-variable>
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload.cause != null) error.exception.errorMessage.payload.cause.message
-else if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Unauthorized",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
@@ -100,29 +88,25 @@ output application/json
 			<ee:transform doc:name="Error Payload" doc:id="a92da288-ccc8-480e-b096-08b7d1579be1" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Forbidden",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[403]]></ee:set-variable>
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Forbidden",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
@@ -133,29 +117,25 @@ output application/json
 			<ee:transform doc:name="Error Payload" doc:id="ec9453b9-185b-424f-863c-f5a079bb93d1" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Not Found",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[404]]></ee:set-variable>
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Not Found",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
@@ -166,29 +146,25 @@ output application/json
 			<ee:transform doc:name="Error Payload" doc:id="adad8675-27f6-46e6-b034-1a943a5534c6" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Bad Gateway",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[502]]></ee:set-variable>
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Bad Gateway",
-	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	errorType: error.errorType.identifier,
+	layer: "order-papi",
+	description: error.exception.message
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
@@ -199,29 +175,25 @@ output application/json
 			<ee:transform doc:name="Error Payload" doc:id="79d61f12-af04-43bf-8514-064a4a3d6db0" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Service Unavaible",
-	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	errorType: error.errorType.identifier,
+	layer: "order-papi",
+	description: error.exception.message
 }]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[503]]></ee:set-variable>
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Service Unavaible",
-	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	errorType: error.errorType.identifier,
+	layer: "order-papi",
+	description: error.exception.message
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
@@ -232,29 +204,25 @@ output application/json
 			<ee:transform doc:name="Error Payload" doc:id="08a3405d-0245-4672-b318-53ac917f19b9" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
 	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Query Execution",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
@@ -277,17 +245,14 @@ output application/json
 }]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
-					<ee:set-variable variableName="httpStatus" ><![CDATA[503]]></ee:set-variable>
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
-	errorType: "Internal Server Error",
+	errorType: error.errorType.identifier,
 	layer: "product-papi",
-	description: error.detailedDescription,
-	cause: cause
+	description: error.exception.message
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
