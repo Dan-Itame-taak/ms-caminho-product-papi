@@ -5,7 +5,7 @@ output application/json
 	"attributes": {
 		"type": "VehicleParameter__c"
 	},		
-	"ExternalId__c": payload.ModeloVeiculo_Codigo ++ "_Model",
+	"ExternalId__c": payload.ModeloVeiculo_Codigo,
 	"Description__c": payload.ModeloVeiculo_Descricao,
 	"Name": payload.ModeloVeiculo_Descricao,
 	"CarBrand__c": payload.Marca_Descricao,

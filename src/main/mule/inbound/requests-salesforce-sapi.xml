@@ -47,4 +47,9 @@
 		<salesforce-sapi:composite-de_25-operaes doc:name="Composite de 25 operações" doc:id="fdcc98da-9cfc-410d-9656-8adb4b321053" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
 		<logger level="INFO" doc:name="Logger After Composit 25" doc:id="d8bae8c0-a385-485e-bded-afb89350e5dd" message="#[%dw 2.0 output application/json --- { correlationId: correlationId, status: vars.httpStatus, payload: payload }]" />
 	</sub-flow>
+	<flow name="send-vehicles-models-to-salesforce" doc:id="3319263a-a0fa-4b51-b5c7-7ac9e58d066c" >
+		<logger level="INFO" doc:name="Logger Before Upsert Vehicles Models" doc:id="0e07a9c1-5189-416c-a7be-6e433fafe7d9" message="Integration: send-vehicles-models-to-salesforce | correlationId: #[correlationId] | payloadSize: #[sizeOf(payload.records)]  | Payload Model: #[payload.records[0]]" />
+		<salesforce-sapi:send-vehicle-models doc:name="Send Vehicle Models" doc:id="1237e853-dcce-4bb8-8490-a6ac3f4eaa04" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
+		<logger level="INFO" doc:name="Logger After Upsert Vehicles Models" doc:id="b91b0e90-1854-4626-b0d7-6c8cc05a10de" message="#[%dw 2.0 output application/json --- { correlationId: correlationId, status: vars.httpStatus, payload: payload }]" />
+	</flow>
 </mule>

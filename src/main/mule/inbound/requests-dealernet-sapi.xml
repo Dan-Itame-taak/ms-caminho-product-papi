@@ -21,4 +21,8 @@ http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schem
 		<logger level="INFO" doc:name="Logger Before Send Asset to DealerNet" doc:id="d420b2e7-9ec5-4245-93f3-ec3de174672e" message="Integration: #[vars.integration] | CorrelationId: #[correlationId] | Payload: #[payload]"/>
 		<dealernet-sapi:send-vehicle-to-dealernet doc:name="Send Vehicle to Dealernet" doc:id="23ce0a42-69c4-4fbf-bf6f-5ba4f43b54e7" config-ref="Dealernet_sapi_Config"/>
 	</sub-flow>
+	<sub-flow name="get-vehicles-models-in-dealernet" doc:id="c87f7ede-db43-4447-ba59-dc4eff0a4734" >
+		<logger level="INFO" doc:name="Logger Before Send Asset to DealerNet" doc:id="f4b66678-a052-4960-be46-ca9d75d2193a" message="Integration: #[vars.integration] | CorrelationId: #[correlationId] | Payload: #[payload]" />
+		<dealernet-sapi:get-vehicle-models doc:name="Get Vehicle Models" doc:id="83c2354e-98ae-4ba1-8b7a-f5ed74bf7016" config-ref="Dealernet_sapi_Config" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" />
+	</sub-flow>
 </mule>

@@ -236,13 +236,14 @@ output application/json
 		</batch:job>
 		<error-handler ref="globalError_Router" />
 	</flow>
-	<flow name="send-vehicle-models-to-salesforce" doc:id="3edfd420-91b7-4ff0-b9d0-ce8f9646bf0a" >
+	<flow name="send-vehicle-models-parameters-from-dealernet-to-salesforceFlow" doc:id="3edfd420-91b7-4ff0-b9d0-ce8f9646bf0a" >
 		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="8e328193-0dba-4ff3-ab49-330db3635fa0" >
 			<scheduling-strategy >
-				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo"/>
+				<cron expression="0 0 7 * * ?" timeZone="America/Sao_Paulo"/>
 			</scheduling-strategy>
 		</scheduler>
-		<dealernet-sapi:get-vehicle-models doc:name="Get Vehicle Models" doc:id="8efb4654-76dc-4df4-878c-cc6093b8081c" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config"/>
+		<logger level="INFO" doc:name="Logger Start Vehicles Models Parameters Flow" doc:id="0659f413-8d33-4635-87ee-b2b4302de9cb" message="Integration: send-vehicle-model-parameters-to-salesforce | CorrelationId: #[correlationId]"/>
+		<flow-ref doc:name="get-vehicles-models-in-dealernet" doc:id="6de0a79a-d25b-4fcd-b7d2-ecd6d1b6174a" name="get-vehicles-models-in-dealernet"/>
 		<ee:transform doc:name="Variables to Get Record Type Id - Collor" doc:id="57db392c-3b5f-4c2a-8877-7c08cb4bbc3f">
 			<ee:message />
 			<ee:variables>
@@ -257,14 +258,16 @@ output application/json
 			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="get-recordType - Models" doc:id="f7cf0d42-b640-44bc-abc6-514a134441f5" name="get-recordType" target="recordTypeModel"/>
-		<logger level="INFO" doc:name="Logger After Get Vehicle Model/Manufactory Year" doc:id="f44f7eba-66f0-4bda-b27f-499d7c205065" message="Integration: send-vehicle-model-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
-		<batch:job jobName="send_vehicle_models_batchJob" doc:id="56e0769f-91b8-4df0-9c49-955f0bf00599" maxFailedRecords="-1" blockSize="1000">
+		<logger level="INFO" doc:name="Logger After Get Vehicle Mode" doc:id="f44f7eba-66f0-4bda-b27f-499d7c205065" message="Integration: send-vehicle-model-parameters-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
+		<batch:job jobName="send_vehicle_models_parameters_batchJob" doc:id="56e0769f-91b8-4df0-9c49-955f0bf00599" maxFailedRecords="-1" blockSize="1000">
 			<batch:process-records >
 				<batch:step name="Batch_Step3" doc:id="eac3fccc-e506-4134-8edc-637c67f2e580" >
 					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="4523d992-3021-4f64-ac38-afa3c9e4acc5" >
 						<ee:message >
 							<ee:set-payload resource="dwl/map-vehicles-models.dwl" />
 						</ee:message>
+						<ee:variables >
+						</ee:variables>
 					</ee:transform>
 					<batch:aggregator doc:name="Batch Aggregator" doc:id="818bcfd5-6b69-420f-81ed-1fa76b67e501" size="200" preserveMimeTypes="true">
 						<ee:transform doc:name="Aggregate payload" doc:id="985b74c6-30c8-4e52-9e80-13991aac018d" >
@@ -278,7 +281,7 @@ output application/json
 }]]></ee:set-payload>
 							</ee:message>
 						</ee:transform>
-						<salesforce-sapi:send-vehicle-models doc:name="Send Vehicle Models" doc:id="12cefc5a-80af-441a-acde-13b95ddbbe32" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
+						<flow-ref doc:name="send-vehicles-models-to-salesforce" doc:id="d01aba4d-b791-4ad1-b599-85644fffb570" name="send-vehicles-models-to-salesforce"/>
 					</batch:aggregator>
 				</batch:step>
 			</batch:process-records>
@@ -287,5 +290,75 @@ output application/json
 			</batch:on-complete>
 		</batch:job>
 		<error-handler ref="globalError_Router" />
+	</flow>
+	<flow name="send-vehicle-models-catalog-from-dealernet-to-salesforceFlow" doc:id="04c2e64d-fc6e-48a2-94d8-77192144219a" >
+		<scheduler doc:name="Scheduler Diario 8 AM" doc:id="af4c69f2-da00-42c6-ab64-e6da9415a280" >
+			<scheduling-strategy >
+				<cron expression="0 0 8 * * ?" timeZone="America/Sao_Paulo" />
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Logger Start Vehicles Models Parameters Flow" doc:id="e361287c-d140-490b-a8ab-54335e6ed066" message="Integration: send-vehicle-model-catalog-to-salesforce | CorrelationId: #[correlationId]" />
+		<flow-ref doc:name="get-vehicles-models-in-dealernet" doc:id="da3322f4-ea2b-4029-bc36-df202c9b0ecb" name="get-vehicles-models-in-dealernet"/>
+		<ee:transform doc:name="Variables to Get Record Type Id - Collor" doc:id="adf7d404-7f44-421b-9da0-2c8ae91122a2" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="object" ><![CDATA[%dw 2.0
+output application/json
+---
+"Product2"]]></ee:set-variable>
+				<ee:set-variable variableName="name" ><![CDATA[%dw 2.0
+output application/json
+---
+"Veículo"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="get-recordType - Models" doc:id="abc4055a-dcf0-4919-a08e-ff6a1f50993b" name="get-recordType" target="recordTypeModelCatalog" />
+		<logger level="INFO" doc:name="Logger After Get Vehicle Model - Catalog" doc:id="a87ce966-0c51-4774-9925-3d14870b1eaa" message="Integration: send-vehicle-model-catalog-parameters-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
+		<batch:job jobName="send_vehicle_models_catalog_batchJob" doc:id="59204c49-8d73-4406-87ed-71685a7063c8" maxFailedRecords="-1" blockSize="1000" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="74160803-6a30-49e4-bb48-1b54ac5cc393" >
+					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="1e098742-844b-479f-89d6-61de7010f0ab" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"attributes": {
+		"type": "Product2"
+	},
+	"VehicleParam__r": {
+        "ExternalId__c": payload.ModeloVeiculo_Codigo
+    },
+    "ExternalId__c": payload.ModeloVeiculo_Codigo,
+	"Name": payload.ModeloVeiculo_Descricao,
+    "VehicleModelCode__c": payload.ModeloVeiculo_Codigo,
+    "RecordTypeId": vars.recordTypeModelCatalog,
+	"Price__c": payload.precoModelo,
+    "IsActive": true
+	}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+						</ee:variables>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="f9532f71-46cb-4a95-b60e-d15e58be09fb" size="200" preserveMimeTypes="true" >
+						<ee:transform doc:name="Aggregate payload" doc:id="32192416-1e0e-47bf-8e28-f499cfca178f" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	allOrNone: false,
+	records: payload
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<flow-ref doc:name="send-products-to-salesforce" doc:id="8f52812e-5804-4e59-a4b3-45682b640163" name="send-products-to-salesforce" />
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="c9d7ac9c-ef86-4518-bbde-9a13d63cb867" message="#[payload]" />
+			</batch:on-complete>
+		</batch:job>
 	</flow>
 </mule>
