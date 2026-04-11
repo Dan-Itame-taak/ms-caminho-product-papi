@@ -8,6 +8,7 @@ payload map (value, index) -> {
 	"Account": {
         "DealerNetExternalId__c": value.codigoCliente
     },
+    "IsActive__c": value.ativo default true,
 	"ExternalId__c": value.codigoVeiculo,
 	"Name": value.nomeVeiculo,
 	"Chassis__c": value.chassi,

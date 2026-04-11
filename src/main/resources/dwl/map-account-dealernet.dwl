@@ -6,7 +6,7 @@ vPayload map (value, index) -> {
   "attributes": {
       "type": "Account"
   },
-  "IsActive__c": value.ativo,
+  "IsActive__c": value.ativo default true,
   "CPFCNPJ__c": value.cpfCnpj,
   "ActivityCode__c": value.codigoAtividade,
   "Email__c": value.email,

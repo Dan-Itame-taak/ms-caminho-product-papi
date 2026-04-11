@@ -38,6 +38,7 @@ output application/json
         "StockType__c": payload."Tipo do Estoque",
         "StatePlate__c": payload."Nome Estado/UF da Placa)",
         "MolicarCode__c": payload."Cod Molicar",
+        "IsActive__c":  true,
         "NumberOfDoors__c": payload.numeroPortas,
         "Store__r":
         {

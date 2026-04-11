@@ -35,9 +35,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-payload>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
@@ -47,9 +48,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-variable>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger Error" doc:id="6c2996d4-9707-4064-b508-100ead4452ef" message="#[vars.erro]" />
@@ -64,9 +66,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-payload>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[401]]></ee:set-variable>
@@ -76,9 +79,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-variable>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger Error" doc:id="81afc8f5-f14c-4ff8-9848-fcc866d61a10" message="#[vars.erro]" />
@@ -93,9 +97,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-payload>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[403]]></ee:set-variable>
@@ -105,9 +110,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-variable>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger Error" doc:id="d3acabf6-9b20-402b-b9d2-c493490d0e6d" message="#[vars.erro]" />
@@ -122,9 +128,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-payload>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[404]]></ee:set-variable>
@@ -134,9 +141,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-variable>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger Error" doc:id="6ed33906-fcc8-4233-83f5-a86a16466850" message="#[vars.erro]" />
@@ -151,9 +159,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-payload>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[502]]></ee:set-variable>
@@ -163,9 +172,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "order-papi",
-	description: error.exception.message
-}]]></ee:set-variable>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger Error" doc:id="d053733a-bce7-43a5-a47b-18f3f8538695" message="#[vars.erro]" />
@@ -180,9 +190,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "order-papi",
-	description: error.exception.message
-}]]></ee:set-payload>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[503]]></ee:set-variable>
@@ -192,9 +203,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "order-papi",
-	description: error.exception.message
-}]]></ee:set-variable>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger Error" doc:id="7be1f56d-5b17-4249-9cbb-ff0891fa67c9" message="#[vars.erro]" />
@@ -209,9 +221,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-payload>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
@@ -221,9 +234,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-variable>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger Error" doc:id="949da8ed-7cd1-4095-baff-c3699fb8faf0" message="#[vars.erro]" />
@@ -233,16 +247,15 @@ output application/json
 			<ee:transform doc:name="Error Payload" doc:id="303cc545-1df2-4ea2-80c7-5b2d311f3af5" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-var cause = if(error.exception.errorMessage.payload != null) error.exception.errorMessage.payload 
-else error.exception.cause.message
+
 output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: error.errorType.namespace,
-	description: error.detailedDescription,
-	cause: cause
-}]]></ee:set-payload>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-payload>
 				</ee:message>
 				<ee:variables >
 					<ee:set-variable variableName="erro" ><![CDATA[%dw 2.0
@@ -251,9 +264,10 @@ output application/json
 ---
 {
 	errorType: error.errorType.identifier,
-	layer: "product-papi",
-	description: error.exception.message
-}]]></ee:set-variable>
+	layer: if(error.errorType.namespace contains ("api")) error.errorType.namespace
+	else "product-papi",
+	description: error.exception.errorMessage.payload.description default error.exception.message
+	}]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger Error" doc:id="774ab216-0e29-416b-8cf2-b8a656e20cb5" message="#[payload]" />

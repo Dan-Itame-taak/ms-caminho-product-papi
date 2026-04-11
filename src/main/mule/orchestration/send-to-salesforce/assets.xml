@@ -105,7 +105,7 @@ output application/json
 		<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="364bd0cc-d10c-45bd-acbb-d5f64d5f856a" message="Integration: send-assets-list-to-salesforce | Size: #[sizeOf(payload)] |  Returned Payload Model: #[payload[0]]" />
 		<flow-ref doc:name="send-assets-to-salesforce" doc:id="b2b84ed9-0145-4b7e-a44a-cce961d03760" name="send-assets-to-salesforce" />
 	</sub-flow>
-	<flow name="send-assets-stock-to-salesforce" doc:id="bde8ad02-4276-4496-ac56-2519ca82a2ca" initialState="stopped">
+	<flow name="send-assets-stock-to-salesforce" doc:id="bde8ad02-4276-4496-ac56-2519ca82a2ca">
 		<scheduler doc:name="Scheduler 1 hora" doc:id="5ab52d0a-41f9-490a-8328-414aa0560279" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="60" timeUnit="MINUTES" startDelay="10"/>
