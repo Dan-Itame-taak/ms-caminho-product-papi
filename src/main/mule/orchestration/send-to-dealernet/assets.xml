@@ -98,6 +98,12 @@ var asset = payload.compositeResponse[0].body.records[0]
     "Veiculo_HyundaiGarantiaEstendida": null                       // sem mapeamento SF
 }]]></ee:set-payload>
 			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="integration" ><![CDATA[%dw 2.0
+output application/json
+---
+"send-asset-from-salesforce-to-dealernet"]]></ee:set-variable>
+			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="send-asset-to-dealernet-sapi" doc:id="8ab01d9d-24bf-48c7-8ab1-b68acef9c11b" name="send-asset-to-dealernet-sapi"/>
 		<ee:transform doc:name="Response Payload" doc:id="e29c8e72-255a-4bfe-b1f2-09b1007b75c3" >

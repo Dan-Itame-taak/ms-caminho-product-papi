@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schem
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd">
-	<flow name="send-optionals-flow" doc:id="f515994e-a7cb-4def-bd7d-84e337743810" initialState="stopped">
+	<flow name="send-optionals-flow" doc:id="f515994e-a7cb-4def-bd7d-84e337743810">
 		<scheduler doc:name="Scheduler 1 hora" doc:id="6025162a-1dca-4e57-b76b-23fdad9f4636" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="60" timeUnit="MINUTES" startDelay="10"/>
