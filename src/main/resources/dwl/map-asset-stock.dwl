@@ -7,7 +7,7 @@ output application/json
             "type": "Asset"
         },
         "Account": {
-        "DealerNetExternalId__c": payload."Cod Empresa"
+        "DealerNetExternalId__c": payload."codigoPessoa"
     	},
         "ExternalId__c": payload."Cod do Veiculo",
         "Name": payload."Modelo do Veiculo",
