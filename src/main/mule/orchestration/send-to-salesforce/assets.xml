@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schem
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
-	<flow name="send-assets-list-to-salesfore-flow" doc:id="feda5b02-f467-4947-9758-d5e6f657d8cc">
+	<flow name="send-assets-list-to-salesfore-flow" doc:id="feda5b02-f467-4947-9758-d5e6f657d8cc" initialState="stopped">
 		<scheduler doc:name="Scheduler 1 hora" doc:id="97d05da4-6a3e-4ba8-acd9-3801f8246eef" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="60" startDelay="100" timeUnit="MINUTES"/>
@@ -113,7 +113,7 @@ output application/json
 		</scheduler>
 		<dealernet-sapi:get-assets-stock doc:name="Get Assets Stock" doc:id="de0890ff-31ee-45e1-bc27-9720602bb039" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config"/>
 		<logger level="INFO" doc:name="Logger After Get Assets Stock" doc:id="ea0223ed-7317-43ca-ade2-0fc0d80cd453" message="Integration: send-assets-stock-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] "/>
-		<batch:job jobName="send_assets_stock_BatchJob" doc:id="8548ad63-bc1b-451a-9fa0-46d3a74c5244" >
+		<batch:job jobName="send_assets_stock_BatchJob" doc:id="8548ad63-bc1b-451a-9fa0-46d3a74c5244" blockSize="1000">
 			<batch:process-records >
 				<batch:step name="Batch_Step" doc:id="7a746b7c-a8da-45b8-9b4b-db0128488212" >
 					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="61e5e7fe-5ed0-4fca-841d-3df4dc62201c">
@@ -133,8 +133,9 @@ output application/json
 }]]></ee:set-payload>
 							</ee:message>
 						</ee:transform>
-						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="0832bc67-9216-49e8-afba-84f7826572ee" message="payload #[payload]"/>
+						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="0832bc67-9216-49e8-afba-84f7826572ee" message="payloadModel #[payload.records[0]]"/>
 						<salesforce-sapi:create-stock doc:name="Create stock" doc:id="d19002d7-b16f-4b17-b91f-7fde2cb8ccb2" client-id="bf0b64df2edc4bd7a4ae38a5140a441f" client-secret="265b41f051d94f28A1AB62018296E99b" config-ref="Salesforce_sapi_Config"/>
+						<logger level="INFO" doc:name="Logger" doc:id="d752d450-314f-47c3-a45f-c50a939ab3b7" message="#[payload]"/>
 					</batch:aggregator>
 				</batch:step>
 			</batch:process-records>

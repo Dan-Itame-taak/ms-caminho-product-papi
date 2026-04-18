@@ -28,7 +28,9 @@ output application/json
         "ProductFamilyCode__c": payload."Cod Familia do Veiculo",
         "ProductFamilyDescription__c": payload."Familia do Veiculo",
         "CombustivelCode__c": payload."Cod Combustivel",
-        "Combustivel__c": if (payload.Combustivel contains  ("HIBRIDO")) "Híbrido" else payload.Combustivel,
+        "Combustivel__c": if (value.combustivel contains  ("HIBRIDO")) "Híbrido" 
+	else if (value.combustivel contains ("NENH")) null
+	else value.combustivel,
         "EngineSpecification__c": payload."Motorizacao Veiculo",
         "CarTransmission__c": payload."Cod Transmissao",
         "ExternalColorCode__c": payload."Codigo da Cor",
