@@ -7,7 +7,7 @@ output application/json
             "type": "Asset"
         },
         "Account": {
-        "DealerNetExternalId__c": payload."codigoPessoa"
+        "ExternalId__c": payload."codigoPessoa"
     	},
         "ExternalId__c": payload."Cod do Veiculo",
         "Name": payload."Modelo do Veiculo",
@@ -28,9 +28,9 @@ output application/json
         "ProductFamilyCode__c": payload."Cod Familia do Veiculo",
         "ProductFamilyDescription__c": payload."Familia do Veiculo",
         "CombustivelCode__c": payload."Cod Combustivel",
-        "Combustivel__c": if (value.combustivel contains  ("HIBRIDO")) "Híbrido" 
-	else if (value.combustivel contains ("NENH")) null
-	else value.combustivel,
+        "Combustivel__c": if (payload.combustivel contains  ("HIBRIDO")) "Híbrido" 
+	else if (payload.combustivel contains ("NENH")) null
+	else payload.combustivel,
         "EngineSpecification__c": payload."Motorizacao Veiculo",
         "CarTransmission__c": payload."Cod Transmissao",
         "ExternalColorCode__c": payload."Codigo da Cor",

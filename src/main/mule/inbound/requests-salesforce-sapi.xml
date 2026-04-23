@@ -11,9 +11,8 @@
 	<!-- Operação upsert-asset: requer que o connector mule-plugin-salesforce-sapi exponha esta operação (upsert Asset por ExternalIdentifier). -->
 	<flow name="send-asset-stock-to-salesforce" doc:id="send-asset-to-salesforce-flow" >
 		<logger level="INFO" doc:name="Logger Before Upsert Asset" message="Integration: send-asset-to-salesforce | correlationId: #[correlationId] | payload: #[payload] " />
-		<salesforce-sapi:create-stock doc:name="Create stock" doc:id="jvtnkk" client-id="123" client-secret="123" config-ref="Salesforce_sapi_Config"/>
+		<salesforce-sapi:create-stock doc:name="Create stock" doc:id="jvtnkk" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}" config-ref="Salesforce_sapi_Config"/>
 		<logger level="INFO" doc:name="Logger After Upsert Asset" message="#[%dw 2.0 output application/json --- { correlationId: correlationId, status: vars.httpStatus, payload: payload }]"/>
-		<error-handler ref="globalError_Router" />
 	</flow>
 	<!-- Envio de Product (Product2) para Salesforce SAPI em formato patch. Se o connector expuser operação patch-product, substituir por ela. -->
 	<sub-flow name="send-products-to-salesforce" doc:id="6b6e05cd-2f2c-4493-b092-f61f79fc205c" >

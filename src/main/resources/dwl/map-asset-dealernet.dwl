@@ -14,7 +14,7 @@ payload map (value, index) -> {
 	"Chassis__c": value.chassi,
 	"FullChassisNumber__c": value.chassi,
 	"Type__c": "Vehicle",
-	"Status": "Faturado", //tratar pra enviar o status real
+	("Status": "Faturado" ) if(isBlank(payload.codigoEstoque)), //tratar pra enviar o status real
 	"Plate__c": value.placa,
 	"Model__c": value.nomeVeiculo,
 	"ModelCode__c": value.codigoModeloVeiculo,

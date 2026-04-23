@@ -2,26 +2,12 @@ api:
   id: ""
 
 salesforce-sapi:
-  host: ""
+  host: "caminho-salesforce-sapi-qnrker.f12twh.usa-e2.cloudhub.io"
   port: "443"
   timeout: "30000"
 
-stock-sapi:
-  host: ""
-  port: "443"
-  timeout: "30000"
-  basePath: "/api"
-
-stock-dealernet-job:
-  client_id: ""
-  client_secret: ""
-
-product-sapi:
-  host: ""
+dealernet-sapi:
+  host: "caminho-dealernet-sapi-qnrker.f12twh.usa-e2.cloudhub.io"
   port: "443"
   timeout: "30000"
   basePath: "/api"
-
-product-dealernet-job:
-  client_id: ""
-  client_secret: ""
