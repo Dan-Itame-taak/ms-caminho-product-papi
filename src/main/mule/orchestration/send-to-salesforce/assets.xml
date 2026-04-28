@@ -12,14 +12,14 @@ http://www.mulesoft.org/schema/mule/dealernet-sapi http://www.mulesoft.org/schem
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/salesforce-sapi http://www.mulesoft.org/schema/mule/salesforce-sapi/current/mule-salesforce-sapi.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
-	<flow name="send-assets-list-to-salesfore-flow" doc:id="feda5b02-f467-4947-9758-d5e6f657d8cc" initialState="stopped">
+	<flow name="send-assets-list-to-salesfore-flow" doc:id="feda5b02-f467-4947-9758-d5e6f657d8cc">
 		<scheduler doc:name="Scheduler 1 hora" doc:id="97d05da4-6a3e-4ba8-acd9-3801f8246eef" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="15" startDelay="100" timeUnit="MINUTES"/>
 			</scheduling-strategy>
 		</scheduler>
 		<logger level="INFO" doc:name="Logger Start Get Assets List" doc:id="40db9d20-120e-4dbc-bebb-ddd08ad37dd4" />
-		<dealernet-sapi:get-vehicles-list doc:name="Get Vehicles List" doc:id="835fa4cd-9ac4-476d-9f1c-f36e1bde0425" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config" time-amount="15"/>
+		<dealernet-sapi:get-vehicles-list doc:name="Get Vehicles List" doc:id="835fa4cd-9ac4-476d-9f1c-f36e1bde0425" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config"/>
 		<ee:transform doc:name="Offset Limit" doc:id="17dbd303-fc7b-4992-b499-1f6ec71298d7" >
 			<ee:message >
 			</ee:message>
@@ -64,14 +64,14 @@ var accountPayload = payload map (value, index) -> {
       "type": "Account"
   },
   "IsActive__c": value.ativo default true,
-  "CPFCNPJ__c": value.cpfCnpj,
+  "InternCPF__c": value.cpfCnpj,
   "ActivityCode__c": value.codigoAtividade,
-  "Email__c": value.email,
+  "InternEmail__c": value.email,
   "ExternalId__c": value.codigoCliente,
   "DealerNetExternalId__c": value.codigoCliente,
   "Name": value.nome,
   "CommercialName__c": value.nomeFantasia,
-  "Phone": (value.telefone splitBy  "  ")[0] replace  " " with "",
+  "InternPhone__c": (value.telefone splitBy  "  ")[0] replace  " " with "",
   "PersonalType__c": if(value.tipoPessoa == "F") "Pessoa Fisica" else "Pessoa Jurídica",
   "BillingCountryCode": "BR",
   "TestDrive__c": null
@@ -106,6 +106,7 @@ payload.codigoVeiculo]]></ee:set-variable>
 			<ee:transform doc:name="Map Asset Payload" doc:id="27e04e66-305f-4b64-bafd-a7db85a04adf" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
+import * from Modules::productsFunctions
 var assetPayload = payload map (value, index) -> {
 	"attributes": {
 		"type": "Asset"
@@ -119,7 +120,7 @@ var assetPayload = payload map (value, index) -> {
 	"Chassis__c": value.chassi,
 	"FullChassisNumber__c": value.chassi,
 	"Type__c": "Vehicle",
-	("Status": "Faturado" ) if(isBlank(payload.codigoEstoque)), //tratar pra enviar o status real
+	("Status": mapStock(payload.codigoEstoque) ) if(isBlank(payload.codigoEstoque)), //tratar pra enviar o status real
 	"Plate__c": value.placa,
 	"Model__c": value.nomeVeiculo,
 	"ModelCode__c": value.codigoModeloVeiculo,
@@ -156,19 +157,27 @@ output application/json
 			</scheduling-strategy>
 		</scheduler>
 		<dealernet-sapi:get-assets-stock doc:name="Get Assets Stock" doc:id="de0890ff-31ee-45e1-bc27-9720602bb039" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config" time-amount="15"/>
-		<logger level="INFO" doc:name="Logger After Get Assets Stock" doc:id="ea0223ed-7317-43ca-ade2-0fc0d80cd453" message="Integration: send-assets-stock-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] "/>
+		<ee:transform doc:name="Filter Payload" doc:id="f393cef9-a3a9-492a-b332-06f88847a54a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload distinctBy $."Cod do Veiculo"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger After Get Assets Stock" doc:id="ea0223ed-7317-43ca-ade2-0fc0d80cd453" message="Integration: send-assets-stock-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
 		<batch:job jobName="send_assets_stock_BatchJob" doc:id="8548ad63-bc1b-451a-9fa0-46d3a74c5244" blockSize="1000" maxFailedRecords="-1" maxConcurrency="1">
-			<batch:process-records >
-				<batch:step name="Batch_Step" doc:id="7a746b7c-a8da-45b8-9b4b-db0128488212" >
+			<batch:process-records>
+				<batch:step name="Batch_Step" doc:id="7a746b7c-a8da-45b8-9b4b-db0128488212">
 					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="61e5e7fe-5ed0-4fca-841d-3df4dc62201c">
 			<ee:message>
 				<ee:set-payload resource="dwl/map-asset-stock.dwl" />
 			</ee:message>
 		</ee:transform>
 					<batch:aggregator doc:name="Batch Aggregator" doc:id="924c97d0-6f09-4d66-9d0f-7a16814420ce" size="200" preserveMimeTypes="true">
-						<ee:transform doc:name="Aggregate payload" doc:id="bcbc52d6-6a7f-4627-a261-69d597e6d123" >
-							<ee:message >
-								<ee:set-payload ><![CDATA[%dw 2.0
+						<ee:transform doc:name="Aggregate payload" doc:id="bcbc52d6-6a7f-4627-a261-69d597e6d123">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -176,23 +185,23 @@ output application/json
 	records: payload
 }]]></ee:set-payload>
 							</ee:message>
-							<ee:variables >
-								<ee:set-variable variableName="stockId" ><![CDATA[%dw 2.0
+							<ee:variables>
+								<ee:set-variable variableName="stockId"><![CDATA[%dw 2.0
 output application/json
 ---
 payload.ExternalId__c]]></ee:set-variable>
 							</ee:variables>
 						</ee:transform>
-						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="0832bc67-9216-49e8-afba-84f7826572ee" message="payloadModel #[payload.records[0]]"/>
-						<flow-ref doc:name="send-asset-stock-to-salesforce" doc:id="c0ba98b5-c799-4eab-8a1d-36947a1b3fe1" name="send-asset-stock-to-salesforce"/>
-						<logger level="INFO" doc:name="Logger" doc:id="d752d450-314f-47c3-a45f-c50a939ab3b7" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload map (value, index) -&gt; if(value.success == true)&#10;{&#10;    idAsset: vars.stockId[(index)],&#10;    sfId: value.id&#10;}&#10;else &#10;{&#10;    idAsset: vars.stockId[(index)],&#10;    description: value.errors[0].message&#10;}]"/>
+						<logger level="INFO" doc:name="Logger Before Salesforce System Request " doc:id="0832bc67-9216-49e8-afba-84f7826572ee" message="payloadModel #[payload.records[0]]" />
+						<flow-ref doc:name="send-asset-stock-to-salesforce" doc:id="c0ba98b5-c799-4eab-8a1d-36947a1b3fe1" name="send-asset-stock-to-salesforce" />
+						<logger level="INFO" doc:name="Logger" doc:id="d752d450-314f-47c3-a45f-c50a939ab3b7" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload map (value, index) -&gt; if(value.success == true)&#10;{&#10;    idAsset: vars.stockId[(index)],&#10;    sfId: value.id&#10;}&#10;else &#10;{&#10;    idAsset: vars.stockId[(index)],&#10;    description: value.errors[0].message&#10;}]" />
 					</batch:aggregator>
 				</batch:step>
 			</batch:process-records>
-			<batch:on-complete >
-				<ee:transform doc:name="Results" doc:id="52ac3f92-4804-42a5-a1d9-e315b420340c" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+			<batch:on-complete>
+				<ee:transform doc:name="Results" doc:id="52ac3f92-4804-42a5-a1d9-e315b420340c">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload]]></ee:set-payload>
@@ -200,7 +209,6 @@ payload]]></ee:set-payload>
 				</ee:transform>
 			</batch:on-complete>
 		</batch:job>
-		<logger level="INFO" doc:name="Logger Finish Get Assets Stock" doc:id="973a0b4f-6501-4651-9118-d147fbc819ce" />
 		<error-handler ref="globalError_Router" />
 	</flow>
 	<flow name="send-vehicle-year-model-to-salesforce" doc:id="de8b684c-8ec7-4791-a3f7-62fde6f1cf5c" >
@@ -402,8 +410,15 @@ output application/json
 	records: payload
 }]]></ee:set-payload>
 							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="modelCode" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.ExternalId__c]]></ee:set-variable>
+							</ee:variables>
 						</ee:transform>
 						<flow-ref doc:name="send-products-to-salesforce" doc:id="8f52812e-5804-4e59-a4b3-45682b640163" name="send-products-to-salesforce" />
+						<logger level="INFO" doc:name="Logger Results Model" doc:id="d2407adb-51ef-4c08-a5e7-a0aebc6689c4" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload map (value, index) -&gt; if(value.success == true)&#10;{&#10;    modelCode: vars.modelCode[(index)],&#10;    sfId: value.id&#10;}&#10;else &#10;{&#10;    modelCode: vars.modelCode[(index)],&#10;    description: value.errors[0].message&#10;}]" />
 					</batch:aggregator>
 				</batch:step>
 			</batch:process-records>

@@ -20,8 +20,10 @@ output application/json
         "LastKmImformed__c": payload."Km Veiculo",
         //"StockDays__c": payload.,
         "Type__c": "Vehicle",
-        "Status": "Disponivel",
-        "Price": payload."ValorVenda",
+        "Status": mapStock(payload."Tipo do Estoque"),
+        "Price": if(!isBlank(payload.valorVendaUsado)) payload.valorVendaUsado 
+        else if (!isBlank(payload."ValorVendaMVP")) payload."ValorVendaMVP"
+        else payload."valorVendaMVAP",
         "AcquisitionValue__c": payload."Valor Compra",
         "ModelCode__c": payload."Cod Modelo do Veiculo",
         "Model__c": payload."Modelo do Veiculo",
