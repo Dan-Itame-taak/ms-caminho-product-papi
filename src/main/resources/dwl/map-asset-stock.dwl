@@ -7,9 +7,12 @@ output application/json
             "type": "Asset"
         },
         "Account": {
-        "ExternalId__c": payload."codigoPessoa"
+        	"ExternalId__c": payload."codigoCliente" default payload.codConcessionaria
     	},
         "ExternalId__c": payload."Cod do Veiculo",
+        "Dealership__r":{
+        	"ExternalId__c":payload.codConcessionaria default payload."codigoCliente"
+        } ,
         "Name": payload."Modelo do Veiculo",
         "Chassis__c": payload.Chassi,
         "FullChassisNumber__c": payload."Chassi Completo",

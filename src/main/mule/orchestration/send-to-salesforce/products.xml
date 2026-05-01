@@ -34,7 +34,7 @@ output application/json
 		<flow-ref doc:name="get-recordType" doc:id="6dfbfc81-8eb7-462f-b3da-7a012d364510" name="get-recordType" target="recordTypePeca"/>
 		<logger level="INFO" doc:name="Logger" doc:id="2ad08fc7-4984-4393-a342-30e8fa29be5a" message="#[vars.recordTypePeca]"/>
 		<flow-ref doc:name="get-products-stock" doc:id="e3505d22-5b70-427f-8f79-03f2e67823a8" name="get-products-stock"/>
-		<batch:job jobName="send_products_stock_BatchJob" doc:id="d0bf39b2-e6f1-4d80-9a1d-30ddbdec8d69" maxFailedRecords="-1" blockSize="1000" maxConcurrency="2">
+		<batch:job jobName="send_products_stock_BatchJob" doc:id="d0bf39b2-e6f1-4d80-9a1d-30ddbdec8d69" maxFailedRecords="-1" blockSize="1000" maxConcurrency="1">
 			<batch:process-records >
 				<batch:step name="Batch_Step" doc:id="d07339c9-c7b5-454f-81df-bbc8a9bee7e2" >
 					<ee:transform doc:name="Map Products Payload From DealerNet" doc:id="be717849-9b84-4491-9a25-22a7cdad5892" >

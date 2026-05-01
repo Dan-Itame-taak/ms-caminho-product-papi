@@ -112,9 +112,12 @@ var assetPayload = payload map (value, index) -> {
 		"type": "Asset"
 	},
 	"Account": {
-        "DealerNetExternalId__c": value.codigoCliente
+        "ExternalId__c": value.codigoCliente default payload.codConcessionaria
     },
     "IsActive__c": value.ativo default true,
+    "Dealership__r":{
+        	"ExternalId__c":payload.codConcessionaria default payload."codigoCliente"
+        },
 	"ExternalId__c": value.codigoVeiculo,
 	"Name": value.nomeVeiculo,
 	"Chassis__c": value.chassi,
@@ -265,7 +268,7 @@ output application/json
 		</ee:transform>
 		<flow-ref doc:name="get-recordType - Collor" doc:id="60666ef7-4cdb-48b7-a8d5-001f8e1f5784" name="get-recordType" target="recordTypeCor"/>
 		<logger level="INFO" doc:name="Logger After Get Vehicle Model/Manufactory Year" doc:id="e82934fd-5533-4278-a8ce-5caa1b882a41" message="Integration: send-vehicle-collor-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
-		<batch:job jobName="send_vehicle_collor_batchJob" doc:id="43e2456a-aece-4b18-94ed-5da7ef88a088" blockSize="1000" maxFailedRecords="-1">
+		<batch:job jobName="send_vehicle_collor_batchJob" doc:id="43e2456a-aece-4b18-94ed-5da7ef88a088" blockSize="1000" maxFailedRecords="-1" maxConcurrency="1">
 			<batch:process-records >
 				<batch:step name="Batch_Step1" doc:id="741033eb-a6bf-4c7e-8057-642e11d5b605" >
 					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="ddb9f43f-e8d6-44d5-bde7-72564f545c77" >
@@ -318,7 +321,7 @@ output application/json
 		</ee:transform>
 		<flow-ref doc:name="get-recordType - Models" doc:id="f7cf0d42-b640-44bc-abc6-514a134441f5" name="get-recordType" target="recordTypeModel"/>
 		<logger level="INFO" doc:name="Logger After Get Vehicle Mode" doc:id="f44f7eba-66f0-4bda-b27f-499d7c205065" message="Integration: send-vehicle-model-parameters-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
-		<batch:job jobName="send_vehicle_models_parameters_batchJob" doc:id="56e0769f-91b8-4df0-9c49-955f0bf00599" maxFailedRecords="-1" blockSize="1000">
+		<batch:job jobName="send_vehicle_models_parameters_batchJob" doc:id="56e0769f-91b8-4df0-9c49-955f0bf00599" maxFailedRecords="-1" blockSize="1000" maxConcurrency="1">
 			<batch:process-records >
 				<batch:step name="Batch_Step3" doc:id="eac3fccc-e506-4134-8edc-637c67f2e580" >
 					<ee:transform doc:name="Map Asset Payload From DealerNet" doc:id="4523d992-3021-4f64-ac38-afa3c9e4acc5" >

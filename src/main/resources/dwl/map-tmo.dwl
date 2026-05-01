@@ -6,8 +6,8 @@ output application/json
     attributes: {
         "type": "Product2"
     },
-    ExternalId__c: if(!isBlank(payload.codigoModeloVeiculo)) payload.codigoTMO ++ "_" ++ payload.codigoEmpresa ++ "_" ++ payload.codigoModeloVeiculo
-    else payload.codigoTMO ++ "_" ++ payload.codigoEmpresa,
+    ExternalId__c: if(!isBlank(payload.codigoModeloVeiculo)) payload.codigoTMO ++ "_" ++ payload.codigoModeloVeiculo
+    else payload.codigoTMO,
     Store__r: {
     	ExternalId__c: mapStore(payload.codigoEmpresa)
     },

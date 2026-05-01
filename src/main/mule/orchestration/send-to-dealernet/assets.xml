@@ -24,7 +24,7 @@ output application/json
                 "InternalColorCode__c, " ++
                 "ExternalColorCode__c, " ++
                 "Account.ExternalId__c, " ++
-                "Store__r.DealerNetExternalId__c, " ++
+                "Store__r.Code__c, " ++
                 "Plate__c, " ++
                 "LastKmImformed__c, " ++
                 "Renavam__c, " ++
@@ -44,6 +44,7 @@ output application/json
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 import * from Modules::productsFunctions
+import remove from dw::core::Strings
 output application/json
 var asset = payload.compositeResponse[0].body.records[0]
 ---
@@ -59,8 +60,8 @@ var asset = payload.compositeResponse[0].body.records[0]
     "Veiculo_CorCodExterna": asset.ExternalColorCode__c,
     "Veiculo_UsuarioCodVendedor": null,                            // sem mapeamento SF
     "Veiculo_PessoaCodCliente": asset.Account.ExternalId__c,
-    "Veiculo_PessoaCodConcessionaria": asset.Store__r.DealerNetExternalId__c,
-    "Veiculo_Placa": asset.Plate__c,
+    "Veiculo_PessoaCodConcessionaria": asset.Store__r.Code__c,
+    "Veiculo_Placa": asset.Plate__c remove "-",
     "Veiculo_EstadoCod_Placa": null,                               // sem mapeamento SF
     "Veiculo_MunicipioCod_Placa": null,                            // sem mapeamento SF
     "Veiculo_Km": asset.LastKmImformed__c,
