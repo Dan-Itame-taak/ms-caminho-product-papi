@@ -25,21 +25,22 @@ output application/json
         "Type__c": "Vehicle",
         "Status": mapStock(payload."Tipo do Estoque"),
         "Price": if(!isBlank(payload.valorVendaUsado)) payload.valorVendaUsado 
+        else if (!isBlank(payload."valorVendaMVAP")) payload."valorVendaMVAP"
         else if (!isBlank(payload."ValorVendaMVP")) payload."ValorVendaMVP"
-        else payload."valorVendaMVAP",
+        else if (!isBlank(payload."valorPromocao")) payload."valorPromocao"
+        else 0,
         "AcquisitionValue__c": payload."Valor Compra",
         "ModelCode__c": payload."Cod Modelo do Veiculo",
         "Model__c": payload."Modelo do Veiculo",
         "ProductFamilyCode__c": payload."Cod Familia do Veiculo",
         "ProductFamilyDescription__c": payload."Familia do Veiculo",
         "CombustivelCode__c": payload."Cod Combustivel",
-        "Combustivel__c": if (payload.combustivel contains  ("HIBRIDO")) "Híbrido" 
-	else if (payload.combustivel contains ("NENH")) null
-	else payload.combustivel,
         "EngineSpecification__c": payload."Motorizacao Veiculo",
         "CarTransmission__c": payload."Cod Transmissao",
-        "ExternalColorCode__c": payload."Codigo da Cor",
-        "ColorName__c": payload.Cor,
+        "ExternalColorCode__c": payload."codigoCorExterna",
+        "ColorName__c": payload.nomeCorExterna,
+        "InternalColorName__c": payload.nomeCorInterna,
+        "InternalColorCode__c": payload.codigoCorInterna,
         "StockCode__c": payload."Cod Estoque",
         "StockDescription__c": payload."Nome do Estoque",
         "StockType__c": payload."Tipo do Estoque",

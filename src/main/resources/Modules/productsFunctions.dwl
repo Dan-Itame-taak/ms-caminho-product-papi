@@ -91,10 +91,32 @@ fun mapStoreReversed(code) = code match {
 }
 
 fun mapStock(code) = code match {
+	case "DI" -> "Disponivel"
+	case "2" -> "Disponivel"
 	case "VU" -> "Disponivel"
+	case "15" -> "Disponivel"
 	case "VN" -> "Disponivel"
+	case "13" -> "Disponivel"
 	case "VD" -> "Disponivel"
+	case "10" -> "Disponivel"
 	case "IM" -> "Bloqueado"
+	case "6" -> "Bloqueado"
 	case "VM" -> "Bloqueado"
 	else -> "Faturado"
 }
+
+fun mapBrand(code) = code match {
+        case "1" -> "FIAT"
+        case "14" -> "FORD"
+        case "18" -> "HYUNDAI"
+        case "19" -> "JAGUAR"
+        case "39" -> "OUTRAS"
+        case "42" -> "DAF"
+        case "43" -> "AGRALE"
+        case "62" -> "HYUNDAI"
+        case "72" -> "RAM"
+        case "73" -> "RAM"
+        case "75" -> "GWM"
+        case "77" -> "OMODA"
+        else -> "null"
+    }

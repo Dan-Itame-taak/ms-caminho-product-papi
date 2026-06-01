@@ -8,10 +8,11 @@ output application/json
     },
     ExternalId__c: if(!isBlank(payload.codigoModeloVeiculo)) payload.codigoTMO ++ "_" ++ payload.codigoModeloVeiculo
     else payload.codigoTMO,
-    Store__r: {
-    	ExternalId__c: mapStore(payload.codigoEmpresa)
+    Brand__r: {
+    	ExternalId__c: mapBrand(payload.codigoMarca)
     },
     Name: payload.nomeTMO,
+    "VehicleModelCode__c": payload.codigoModeloVeiculo,
     ProductType__c: payload.tipoTMO,
     TmoReference__c: payload.referencia,
     DepartmentCode__c: payload.codigoSetorServico,
@@ -31,8 +32,8 @@ output application/json
     Price__c: payload.valorFixoTMO,
     TmoRevision__c: payload.revisao,
     TmoOwnProduction__c: payload.producaoPropria default false,
-    TmoTempoDealership__c: payload.tempoConcessionaria,
-    TmoTempoAutomaker__c: payload.tempoMontadora,
+    TmoTempoDealership__c: payload.tempoConcessionaria default 0,
+    TmoTempoAutomaker__c: payload.tempoMontadora default 0,
     TmoRequiresTest__c: payload.exigeTesteVeiculo,
     RecordTypeId: vars.recordTypeTMO,
     (TMO__r: {

@@ -5,11 +5,12 @@ output application/json
 	"attributes": {
 		"type": "VehicleParameter__c"
 	},		
-	"ExternalId__c": payload.ModeloVeiculo_Codigo,
+	"ExternalId__c": payload.ModeloVeiculo_Codigo ++ "_Model",
 	"Description__c": payload.ModeloVeiculo_Descricao,
 	"Name": payload.ModeloVeiculo_Descricao,
 	"CarBrand__c": payload.Marca_Descricao,
 	"Model__c": payload.ModeloVeiculo_Modelo,
+	"ModelYear__c": payload.ModeloVeiculoPreco_AnoModelo,
 	"GroupCode__c": payload.ModeloVeiculo_GrupoModeloCod,
 	"FuelCode__c": payload.ModeloVeiculo_CombustivelCod,
 	"VehicleFamilyCodeNew__c": payload.ModeloVeiculo_FamiliaVeiculoCod_Novos,

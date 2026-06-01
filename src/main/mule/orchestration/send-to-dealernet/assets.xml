@@ -24,14 +24,15 @@ output application/json
                 "InternalColorCode__c, " ++
                 "ExternalColorCode__c, " ++
                 "Account.ExternalId__c, " ++
-                "Store__r.Code__c, " ++
+                "Dealership__r.ExternalId__c, " ++
                 "Plate__c, " ++
                 "LastKmImformed__c, " ++
                 "Renavam__c, " ++
                 "DeliveryDate__c, " ++
                 "StockType__c, " ++
                 "Createdby.DealerNetCode__c, " ++
-                "CreatedDate " ++
+                "CreatedDate, " ++
+                "StatePlate__c " ++
                 "FROM Asset WHERE Id = '" ++ vars.assetId ++ "'",
             referenceId: "Ativo"
         }
@@ -58,13 +59,13 @@ var asset = payload.compositeResponse[0].body.records[0]
     "Veiculo_ModeloVeiculoCod": asset.ModelCode__c,
     "Veiculo_CorCodInterna": asset.InternalColorCode__c,
     "Veiculo_CorCodExterna": asset.ExternalColorCode__c,
-    "Veiculo_UsuarioCodVendedor": null,                            // sem mapeamento SF
+    "Veiculo_UsuarioCodVendedor": asset.CreatedBy.DealerNetCode__c,                            // sem mapeamento SF
     "Veiculo_PessoaCodCliente": asset.Account.ExternalId__c,
-    "Veiculo_PessoaCodConcessionaria": asset.Store__r.Code__c,
+    "Veiculo_PessoaCodConcessionaria": asset.Dealership__r.ExternalId__c,
     "Veiculo_Placa": asset.Plate__c remove "-",
-    "Veiculo_EstadoCod_Placa": null,                               // sem mapeamento SF
+    "Veiculo_EstadoCod_Placa": asset.StatePlate__c,                               // sem mapeamento SF
     "Veiculo_MunicipioCod_Placa": null,                            // sem mapeamento SF
-    "Veiculo_Km": asset.LastKmImformed__c,
+    "Veiculo_Km": asset.LastKmImformed__c remove ".",
     "Veiculo_PIC": null,                                           // sem mapeamento SF
     "Veiculo_NroRenavam": asset.Renavam__c,
     "Veiculo_UsoSevero": 0,                                        // sem mapeamento SF - default 0

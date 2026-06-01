@@ -105,14 +105,14 @@
 		</dependency>
 		<dependency>
 			<groupId>3ef2b520-3a61-4eeb-b14c-cd1a42d10fb4</groupId>
-			<artifactId>mule-plugin-salesforce-sapi</artifactId>
-			<version>1.0.30</version>
+			<artifactId>mule-plugin-dealernet-sapi</artifactId>
+			<version>1.0.29</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
 			<groupId>3ef2b520-3a61-4eeb-b14c-cd1a42d10fb4</groupId>
-			<artifactId>mule-plugin-dealernet-sapi</artifactId>
-			<version>1.0.28</version>
+			<artifactId>mule-plugin-salesforce-sapi</artifactId>
+			<version>1.0.31</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>

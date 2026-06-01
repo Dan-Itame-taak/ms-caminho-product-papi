@@ -15,11 +15,11 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 	<flow name="send-assets-list-to-salesfore-flow" doc:id="feda5b02-f467-4947-9758-d5e6f657d8cc">
 		<scheduler doc:name="Scheduler 1 hora" doc:id="97d05da4-6a3e-4ba8-acd9-3801f8246eef" >
 			<scheduling-strategy >
-				<fixed-frequency frequency="15" startDelay="100" timeUnit="MINUTES"/>
+				<fixed-frequency frequency="15" startDelay="15" timeUnit="MINUTES"/>
 			</scheduling-strategy>
 		</scheduler>
 		<logger level="INFO" doc:name="Logger Start Get Assets List" doc:id="40db9d20-120e-4dbc-bebb-ddd08ad37dd4" />
-		<dealernet-sapi:get-vehicles-list doc:name="Get Vehicles List" doc:id="835fa4cd-9ac4-476d-9f1c-f36e1bde0425" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config"/>
+		<dealernet-sapi:get-vehicles-list doc:name="Get Vehicles List" doc:id="835fa4cd-9ac4-476d-9f1c-f36e1bde0425" client-id="${secure::dealernet-sapi.client_id}" client-secret="${secure::dealernet-sapi.client_secret}" config-ref="Dealernet_sapi_Config" time-unit="minute" time-amount="15"/>
 		<ee:transform doc:name="Offset Limit" doc:id="17dbd303-fc7b-4992-b499-1f6ec71298d7" >
 			<ee:message >
 			</ee:message>
@@ -116,14 +116,16 @@ var assetPayload = payload map (value, index) -> {
     },
     "IsActive__c": value.ativo default true,
     "Dealership__r":{
-        	"ExternalId__c":payload.codConcessionaria default payload."codigoCliente"
+        	"ExternalId__c":value.codConcessionaria default value."codigoCliente"
         },
 	"ExternalId__c": value.codigoVeiculo,
 	"Name": value.nomeVeiculo,
 	"Chassis__c": value.chassi,
 	"FullChassisNumber__c": value.chassi,
 	"Type__c": "Vehicle",
-	("Status": mapStock(payload.codigoEstoque) ) if(isBlank(payload.codigoEstoque)), //tratar pra enviar o status real
+	"Status": if(value.movSaida == "S") "Faturado"
+	else if (value.movSaida == "E" and value.statusReserva == "AUT") "Bloqueado"
+	else mapStock(value.codigoEstoque),
 	"Plate__c": value.placa,
 	"Model__c": value.nomeVeiculo,
 	"ModelCode__c": value.codigoModeloVeiculo,
@@ -132,11 +134,10 @@ var assetPayload = payload map (value, index) -> {
 	"YearModel__c": value.anoModelo,
 	"YearOfManufacture__c": value.anoFabricacao,
 	"ColorName__c": value.corExterna,
+	"InternalColorName__c": value."corInterna",
 	"Renavam__c": value.renavam,
 	"NumberOfDoors__c": value.numeroPortas,
-	"Combustivel__c": if (value.combustivel contains  ("HIBRIDO")) "Híbrido" 
-	else if (value.combustivel contains ("NENH")) null
-	else value.combustivel,
+	"CombustivelCode__c": value.combustivel,
 	"ProductFamilyDescription__c": value.familiaFamilia
 }
 output application/json
@@ -287,8 +288,15 @@ output application/json
 	records: payload
 }]]></ee:set-payload>
 							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="collorCode" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.ExternalId__c]]></ee:set-variable>
+							</ee:variables>
 						</ee:transform>
 						<salesforce-sapi:send-vehicle-collor-list doc:name="Send Vehicle Collor List" doc:id="7d19e70e-a8f6-4274-8ed7-4fb32fd19708" config-ref="Salesforce_sapi_Config" client-id="${secure::salesforce-sapi.client_id}" client-secret="${secure::salesforce-sapi.client_secret}"/>
+						<logger level="INFO" doc:name="Logger Results Model" doc:id="465c8e48-85e4-4c81-9c74-824c158ef79a" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload map (value, index) -&gt; if(value.success == true)&#10;{&#10;    collorCode: vars.collorCode[(index)],&#10;    sfId: value.id&#10;}&#10;else &#10;{&#10;    collorCode: vars.collorCode[(index)],&#10;    description: value.errors[0].message&#10;}]" />
 					</batch:aggregator>
 				</batch:step>
 			</batch:process-records>
@@ -321,6 +329,14 @@ output application/json
 		</ee:transform>
 		<flow-ref doc:name="get-recordType - Models" doc:id="f7cf0d42-b640-44bc-abc6-514a134441f5" name="get-recordType" target="recordTypeModel"/>
 		<logger level="INFO" doc:name="Logger After Get Vehicle Mode" doc:id="f44f7eba-66f0-4bda-b27f-499d7c205065" message="Integration: send-vehicle-model-parameters-to-salesforce | Size: #[sizeOf(payload)] | Returned Payload Model: #[payload[0]] " />
+		<ee:transform doc:name="Distinct Payload" doc:id="7e3603b9-25f5-4b87-a34a-16e1243a2abf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload distinctBy $.ModeloVeiculo_Codigo]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<batch:job jobName="send_vehicle_models_parameters_batchJob" doc:id="56e0769f-91b8-4df0-9c49-955f0bf00599" maxFailedRecords="-1" blockSize="1000" maxConcurrency="1">
 			<batch:process-records >
 				<batch:step name="Batch_Step3" doc:id="eac3fccc-e506-4134-8edc-637c67f2e580" >
@@ -342,8 +358,15 @@ output application/json
 	records: payload
 }]]></ee:set-payload>
 							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="modelCode" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.ExternalId__c]]></ee:set-variable>
+							</ee:variables>
 						</ee:transform>
 						<flow-ref doc:name="send-vehicles-models-to-salesforce" doc:id="d01aba4d-b791-4ad1-b599-85644fffb570" name="send-vehicles-models-to-salesforce"/>
+						<logger level="INFO" doc:name="Logger Results Model Parameters" doc:id="01026109-5e33-412e-a524-28a645f47df6" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload map (value, index) -&gt; if(value.success == true)&#10;{&#10;    modelCodeParam: vars.modelCode[(index)],&#10;    sfId: value.id&#10;}&#10;else &#10;{&#10;    modelCodeParam: vars.modelCode[(index)],&#10;    description: value.errors[0].message&#10;}]" />
 					</batch:aggregator>
 				</batch:step>
 			</batch:process-records>
@@ -389,13 +412,17 @@ output application/json
 		"type": "Product2"
 	},
 	"VehicleParam__r": {
-        "ExternalId__c": payload.ModeloVeiculo_Codigo
+        "ExternalId__c": payload.ModeloVeiculo_Codigo ++ "_Model"
     },
-    "ExternalId__c": payload.ModeloVeiculo_Codigo,
+    "ExternalId__c": if(!isBlank(payload.ModeloVeiculoPreco_AnoModelo)) payload.ModeloVeiculo_Codigo ++ "_" ++ payload.ModeloVeiculoPreco_AnoModelo
+    else payload.ModeloVeiculo_Codigo,
 	"Name": payload.ModeloVeiculo_Descricao,
+	"YearModel__c": payload.ModeloVeiculoPreco_AnoModelo,
     "VehicleModelCode__c": payload.ModeloVeiculo_Codigo,
     "RecordTypeId": vars.recordTypeModelCatalog,
-	"Price__c": payload.precoModelo,
+	"Price__c": if(payload.precoModeloAno != null) payload.precoModeloAno
+	else if (payload.precoModelo != null) payload.precoModelo
+	else 0,
     "IsActive": true
 	}]]></ee:set-payload>
 						</ee:message>
