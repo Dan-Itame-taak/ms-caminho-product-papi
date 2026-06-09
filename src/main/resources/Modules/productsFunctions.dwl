@@ -99,9 +99,10 @@ fun mapStock(code) = code match {
 	case "13" -> "Disponivel"
 	case "VD" -> "Disponivel"
 	case "10" -> "Disponivel"
-	case "IM" -> "Bloqueado"
-	case "6" -> "Bloqueado"
-	case "VM" -> "Bloqueado"
+	case "12" -> "Imobilizado"
+	case "IM" -> "Imobilizado"
+	case "6" -> "Imobilizado"
+	case "VM" -> "Imobilizado"
 	else -> "Faturado"
 }
 
